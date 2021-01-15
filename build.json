@@ -1,0 +1,12 @@
+{
+    "entry": "src/index.js",
+    "plugins": [
+        [
+            "build-plugin-fusion", {
+              "themePackage": "@icedesign/skin"
+            }
+        ],
+        "./build.plugin.js"
+    ],
+    "disableRuntime": true
+}
