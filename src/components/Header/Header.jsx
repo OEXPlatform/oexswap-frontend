@@ -53,9 +53,8 @@ export default class Header extends PureComponent {
       languages: [{value: 'ch', label:'中文'}, {value: 'en', label:'English'}],
       curLang: (defaultLang == null || defaultLang == 'ch') ? 'English' : '中文',
       defaultLang,
-      nodes: [{value: constant.mainNetRPCHttpsAddr, label:T('主网：') + constant.mainNetRPCHttpsAddr}, 
-              {value: constant.testNetRPCHttpsAddr, label:T('测试网：') + constant.testNetRPCHttpsAddr}, 
-              {value: constant.LocalRPCAddr, label:T('本地节点：') + constant.LocalRPCAddr}, 
+      nodes: [{value: constant.mainNet1RPCHttpsAddr, label:T('主网1：') + constant.mainNet1RPCHttpsAddr}, 
+              {value: constant.mainNet2RPCHttpsAddr, label:T('主网2：') + constant.mainNet2RPCHttpsAddr}, 
               {value: 'others', label: T('自定义')}],
     };
     setLang(this.state.defaultLang);
@@ -98,11 +97,9 @@ export default class Header extends PureComponent {
     cookie.save('nodeInfo', nodeInfo, {path: '/', maxAge: 3600 * 24 * 360});
     axios.defaults.baseURL = nodeInfo;
     await oexchain.utils.setProvider(nodeInfo);
-    oexchain.oex.getChainConfig(chainConfig => {
-      this.state.chainId = chainConfig.chainId;
-      this.setState({ nodeConfigVisible: false, nodeInfo });
-      location.reload(true);
-    });
+    const chainConfig = await oexchain.oex.getChainConfig(false);
+    this.setState({ nodeConfigVisible: false, nodeInfo, chainId: chainConfig.chainId });
+    //location.reload(true);
   }
 
   onConfigAcountOK = () => {
@@ -281,7 +278,7 @@ export default class Header extends PureComponent {
                 placeholder={T("选择节点")}
                 onChange={this.onChangeNode.bind(this, 'nodeInfo')}
                 value={this.state.nodeInfo}
-                defaultValue={constant.testNetRPCHttpsAddr}
+                defaultValue={constant.mainNet1RPCHttpsAddr}
                 dataSource={this.state.nodes}
             />
             <br />

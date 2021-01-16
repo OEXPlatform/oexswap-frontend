@@ -33,7 +33,7 @@ export const AccountObj = 'accountObj';
 export const AccountFile = 'accountInfo';
 export const KeyStore = 'keystore';
 export const KeyStoreFile = 'keystoreInfo';
-export const TxInfoFile = 'txInfo';
+export const TxInfoFile = 'txList';
 export const ContractABIFile = 'contractABI';
 export const ContractNameFile = 'contractName';
 export const TestSceneFile = 'testScene';
@@ -62,9 +62,8 @@ export const BlockStatus = { Rollbacked: -1, Irreversible: 0, Reversible: 1, Unk
 export const SysTokenId = 0;
 export const SysTokenDecimal = 18;
 
-export const mainNetRPCHttpsAddr = 'https://mainnet-bj.oexchain.com'; 
-export const testNetRPCHttpsAddr = 'https://testnet-bj.oexchain.com';
-export const LocalRPCAddr = 'http://127.0.0.1:8545';
+export const mainNet1RPCHttpsAddr = 'https://mainnet-hk.oexchain.com';
+export const mainNet2RPCHttpsAddr = 'https://mainnet-bj.oexchain.com'; 
 
 // 创建账户的代理服务器
 export const proxySrvAddr = {1: 'http://oexchain.io:9000', 100: 'http://testnet.oexchain.io:9001'};

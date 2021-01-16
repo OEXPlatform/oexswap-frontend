@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Dialog, Select } from '@icedesign/base';
-import { Input, Button, Tab, Grid, Checkbox, Collapse, Message, Icon, Balloon, Divider } from '@alifd/next';
+import { Input, Button, Table, Grid, Checkbox, Collapse, Message, Icon, Balloon, Divider } from '@alifd/next';
+import IceContainer from '@icedesign/container';
 import * as oexchain from 'oex-web3';
 import * as ethers from 'ethers';
 import cookie from 'react-cookies';
@@ -35,9 +36,11 @@ export default class OexSwap extends Component {
   constructor(props) {
     super(props);
     const account = utils.getDataFromFile(Constant.AccountObj);
+    const txInfoList = utils.getDataFromFile(Constant.TxInfoFile);
     this.state = {
        account,
        accountName: account.accountName,
+       txInfoList: txInfoList != null ? txInfoList : [],
        fromInfo: {value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null},
        toInfo: {value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null},       
        assetList: [],
@@ -48,8 +51,9 @@ export default class OexSwap extends Component {
        pairMap: {},
        feeRate: 0,
        curPairInfo: {myPercent: 0},
-       contractName: 'x77c3647558c',
-       liquidToBeRemoved: 0,
+       contractName: 'oexswaptest010',
+       minerContractName: 'oexminertest011',
+       liquidToBeRemoved: '',
        maxLiquidTip: '最多可移除的流动性数量:',
        txInfoVisible: false,
        sysTokenID: 0,
@@ -63,7 +67,11 @@ export default class OexSwap extends Component {
        gasLimit: 1000000,
        pairAssetInfo: '',
        password: '',
-       bLiquidOp: false
+       bLiquidOp: false,
+       userRemovedLiquidVisible: false,
+       liquidDecimals: 0,
+       miningVisible: false,
+       miningInfo: {curMiningOEX: 0, myHavestOEX: 0},
      };
   }
 
@@ -79,12 +87,20 @@ export default class OexSwap extends Component {
     });
     let nodeInfo = cookie.load('nodeInfo');
     await oexchain.utils.setProvider(nodeInfo);
+    var chainConfig = await oexchain.oex.getChainConfig(false);
+    if (chainConfig == null) {
+      chainConfig = await oexchain.oex.getChainConfig(true);
+    }
+    await oexchain.oex.setChainConfig(chainConfig);
     this.getAllPair();
     this.getFeeRate();
     this.state.myKeystore = utils.getDataFromFile(Constant.KeyStore);
+    oexchain.account.getAccountByName(this.state.accountName).then(account => {
+      this.setState({account});
+    });
     oexchain.oex.getSuggestionGasPrice().then(gasPrice => {
       this.setState({ suggestionPrice: utils.getReadableNumber(gasPrice, 9, 9) });
-    })
+    });
   }
 
   getAllPair = () => {
@@ -154,46 +170,88 @@ export default class OexSwap extends Component {
     let payloadInfo = {funcName:'addLiquidity', types:[], values: [], assetInfos};
 
     oexchain.action.executeContractWithMultiAsset(actionInfo, gasInfo, payloadInfo, privateKey).then(txHash => {
-      this.checkReceipt(txHash);
-      this.setState({txInfoVisible: false});
+      this.checkReceipt(txHash, {txHash, actionInfo: {
+        typeId: 0,
+        typeName: '添加流动性',
+        accountName,
+        inAssetInfo: {assetInfo: fromInfo.selectAssetInfo, amount: fromInfo.value},
+        outAssetInfo: {assetInfo: toInfo.selectAssetInfo, amount: toInfo.value}
+      }});
     });
   }
 
   removeLiquidity = (gasInfo, privateKey) => {
-    const { curPairInfo, liquidToBeRemoved, accountName, contractName } = this.state;
+    const { curPairInfo, liquidToBeRemoved, accountName, contractName, fromInfo } = this.state;
+    const liquidRemoved = '0x' + new BigNumber(liquidToBeRemoved).shiftedBy(this.state.liquidDecimals - 2).toString(16);
     let actionInfo = {accountName, toAccountName: contractName, assetId: 0, amount: new BigNumber(0), remark: ''}    
-    let payloadInfo = {funcName:'removeLiquidity', types:['uint256', 'uint256'], values: [curPairInfo.index, liquidToBeRemoved]}
+    let payloadInfo = {funcName:'removeLiquidity', types:['uint256', 'uint256'], values: [curPairInfo.index, liquidRemoved]}
 
     oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then(txHash => {
-      this.checkReceipt(txHash);
-      this.setState({txInfoVisible: false});
+      this.checkReceipt(txHash, {txHash, actionInfo: {
+        typeId: 1,
+        typeName: '移除流动性',
+        accountName
+      }});
     });
   }
 
-  swapAsset =  (gasInfo, privateKey) => {
+  swapAsset = (gasInfo, privateKey) => {
     const { fromInfo, toInfo, curPairInfo, selectedTolerance, inputTolerance, accountName, contractName } = this.state;
     let actionInfo = {accountName, toAccountName: contractName, assetId: fromInfo.selectAssetInfo.assetid, 
                       amount: new BigNumber(fromInfo.value).shiftedBy(fromInfo.selectAssetInfo.decimals), remark: ''}
 
     const tolerance = selectedTolerance > 0 ? selectedTolerance : inputTolerance * 10;            
-    const minAmount = '0x' + new BigNumber(toInfo.value).shiftedBy(toInfo.selectAssetInfo.decimals).multipliedBy(1000 - tolerance).dividedBy(1000).toString(16);
+    var minAmount = '0x' + new BigNumber(toInfo.value).shiftedBy(toInfo.selectAssetInfo.decimals - 3).multipliedBy(1000 - tolerance).toString(16);
+    if (minAmount.indexOf('.') > 0) {
+      minAmount = minAmount.substr(0, minAmount.indexOf('.'));
+    }
     let payloadInfo = {funcName:'exchange', types:['uint256', 'uint256'], values: [curPairInfo.index, minAmount]};
-
     oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then(txHash => {
-      this.checkReceipt(txHash);
-      this.setState({txInfoVisible: false});
+      this.checkReceipt(txHash, {txHash, actionInfo: {typeId: 2, typeName: '兑换', accountName,
+                                                      inAssetInfo: {assetInfo: fromInfo.selectAssetInfo, amount: fromInfo.value},
+                                                      outAssetInfo: {assetInfo: toInfo.selectAssetInfo}}});    
     }).catch(error => {
       Notification.displayErrorInfo(error);
     });
   }
 
-  checkReceipt = (txHash) => {
+  getMiningOEXPerBlock = () => {
+    oexchain.oex.getCurrentBlock().then(blockInfo => {
+      let payloadInfo = {funcName:'getReward', types:['uint256'], values: [blockInfo.number]};  // types和values即合约方法的参数类型和值
+      oexchain.action.readContract(this.state.accountName, this.state.minerContractName, payloadInfo, 'latest').then(reward => {
+        this.state.miningInfo.curMiningOEX = new BigNumber(reward).shiftedBy(-18).toString();
+        this.setState({miningInfo: this.state.miningInfo});
+      }).catch(err => console.log(err));
+    });
+  }
+
+  getMyHavestOEX = () => {
+    let payloadInfo = {funcName:'getAmount', types:[], values: []};  // types和values即合约方法的参数类型和值
+    oexchain.action.readContract(this.state.accountName, this.state.minerContractName, payloadInfo, 'latest').then(reward => {
+      this.state.miningInfo.myHavestOEX = new BigNumber(reward).shiftedBy(-18).toString();
+      this.setState({miningInfo: this.state.miningInfo});
+    }).catch(err => console.log(err));
+  }
+
+  harvest = (gasInfo, privateKey) => {
+    const { accountName, minerContractName } = this.state;
+    let actionInfo = {accountName, toAccountName: minerContractName, assetId: 0, amount: new BigNumber(0), remark: ''}    
+    let payloadInfo = {funcName:'withdraw', types:[], values: []}
+
+    oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then(txHash => {
+      this.checkReceipt(txHash, {txHash, actionInfo: {
+        typeId: 3, typeName: '提取挖矿奖励', accountName
+      }});
+    });
+  }
+
+  checkReceipt = (txHash, txDetailInfo) => {
     let count = 0;
     if (txHash != null) {
       Notification.displayTxInfo(txHash);
     }
     const intervalId = setInterval(() => {
-      oexchain.oex.getTransactionReceipt(txHash).then(receipt => {
+      oexchain.oex.getTransactionReceipt(txHash).then(async (receipt) => {
         if (receipt == null) {
           count++;
           if (count == 10) {
@@ -208,6 +266,23 @@ export default class OexSwap extends Component {
           } else {
             Notification.displayReceiptSuccessInfo(txHash);
             this.updateBaseInfo(this.state.fromInfo, this.state.toInfo);
+          }
+          if (txDetailInfo != null) {
+            var { txInfoList } = this.state;
+            txDetailInfo.status = actionResults[0].status;
+            if (txDetailInfo.status == 1) {
+              const internalTx = await oexchain.oex.getInternalTxByHash(txHash);
+              if (internalTx != null) {
+                txDetailInfo.innerActions = internalTx.actions[0].internalActions;
+              }
+            }
+            txDetailInfo.time = new Date().toLocaleString();;
+            txInfoList = [txDetailInfo, ...txInfoList];
+            if (txInfoList.length > 100) {
+              txInfoList = txInfoList.slice(0, 100);
+            }
+            this.state.txInfoList = txInfoList;
+            utils.storeDataToFile(Constant.TxInfoFile, txInfoList);
           }
         }
       });
@@ -224,7 +299,7 @@ export default class OexSwap extends Component {
   }
 
   startRemoveLiquidity = () => {
-    this.setState({callbackFunc: this.removeLiquidity, txInfoVisible: true});
+    this.setState({userRemovedLiquidVisible: true});
   }
 
   startSwapAsset = () => {
@@ -255,7 +330,7 @@ export default class OexSwap extends Component {
     k = new BigNumber(pairInfo.firstAssetNumber).multipliedBy(new BigNumber(pairInfo.secondAssetNumber));
     x = new BigNumber(bFirstAsset ? pairInfo.firstAssetNumber : pairInfo.secondAssetNumber).plus(inAmount);
     outValue = new BigNumber(bFirstAsset ? pairInfo.secondAssetNumber : pairInfo.firstAssetNumber).minus(k.dividedBy(x));
-    return outValue.shiftedBy(toInfo.selectAssetInfo.decimals * -1).toFixed(6);
+    return outValue.shiftedBy(toInfo.selectAssetInfo.decimals * -1);
   }
 
   assetRender = (item) => {
@@ -295,8 +370,8 @@ export default class OexSwap extends Component {
         curPairInfo.index -= 1;
         const totalLiquid = await this.getPairTotalLiquid(curPairInfo.index);
         const userLiquid = await this.getUserLiquidInPair(curPairInfo.index, this.state.account.accountID);
-        curPairInfo.totalLiquid = totalLiquid;
-        curPairInfo.userLiquid = userLiquid;
+        curPairInfo.totalLiquid = totalLiquid.multipliedBy(100);
+        curPairInfo.userLiquid = userLiquid.multipliedBy(100);
         curPairInfo.myPercent = userLiquid.dividedBy(totalLiquid).multipliedBy(100).toFixed(2);
 
         const pairInfo = await this.getPairByIndex(curPairInfo.index);
@@ -306,6 +381,10 @@ export default class OexSwap extends Component {
           firstAssetInfo = toInfo.selectAssetInfo;
           secondAssetInfo = fromInfo.selectAssetInfo;
         }
+        this.state.liquidDecimals = firstAssetInfo.decimals;
+        curPairInfo.totalLiquid = curPairInfo.totalLiquid.shiftedBy(this.state.liquidDecimals * -1);
+        curPairInfo.userLiquid = curPairInfo.userLiquid.shiftedBy(this.state.liquidDecimals * -1);
+
         const firstAssetAmount = pairInfo.firstAssetNumber.shiftedBy(firstAssetInfo.decimals * -1).toFixed(6);
         const secondAssetAmount = pairInfo.secondAssetNumber.shiftedBy(secondAssetInfo.decimals * -1).toFixed(6);
         this.state.pairAssetInfo = firstAssetAmount + ' ' + firstAssetInfo.symbol.toUpperCase() 
@@ -478,7 +557,7 @@ export default class OexSwap extends Component {
         return;
       }
     }
-
+    this.setState({txInfoVisible: false});
     const gasInfo = {gasPrice: '0x' + new BigNumber(this.state.gasPrice).shiftedBy(9).toString(16), 
                      gasLimit: '0x' + new BigNumber(this.state.gasLimit).toString(16)}
 
@@ -496,15 +575,32 @@ export default class OexSwap extends Component {
   }
 
   updateToValue = () => {
-    if (this.isPairNormal()) {
+    const { fromInfo, toInfo, curPairInfo } = this.state;
+    if (this.isPairNormal() && fromInfo.value > 0) {
+      const toDecimals = toInfo.selectAssetInfo.decimals;
       if (!this.state.bLiquidOp) {
-        this.getOutAmount(this.state.curPairInfo.index, this.state.fromInfo.value).then(outAmount => {
+        this.getOutAmount(curPairInfo.index, this.state.fromInfo.value).then(outAmount => {
           //outAmount = new BigNumber(outAmount).shiftedBy(this.state.toInfo.selectAssetInfo.decimals * -1).toString();
-          this.state.toInfo.value = outAmount;
+          this.state.toInfo.value = outAmount.toFixed(toDecimals, 1);
           this.setState({toInfo: this.state.toInfo});
         })
       } else {
-        
+        this.getPairByIndex(curPairInfo.index).then(pairInfo => {
+          var outValue;
+          const fromAmount = new BigNumber(fromInfo.value).shiftedBy(fromInfo.selectAssetInfo.decimals - toDecimals);
+          if (fromInfo.selectAssetInfo.assetid == pairInfo.firstAssetId) {
+            outValue = pairInfo.secondAssetNumber.multipliedBy(fromAmount).dividedBy(pairInfo.firstAssetNumber);
+          } else {
+            outValue = pairInfo.firstAssetNumber.multipliedBy(fromAmount).dividedBy(pairInfo.secondAssetNumber);
+          }
+          if (outValue.toNumber() == 0) {
+            outValue = new BigNumber(1).shiftedBy(toDecimals * -1).toFixed(toDecimals);
+          } else {
+            outValue = outValue.shiftedBy(toDecimals).plus(1).shiftedBy(toDecimals * -1).toFixed(toDecimals);
+          }
+          this.state.toInfo.value = outValue;
+          this.setState({toInfo: this.state.toInfo});
+        })
       }
     }
   }
@@ -518,15 +614,98 @@ export default class OexSwap extends Component {
       Notification.displayWarningInfo("请输入流动性数值");
       return;
     }
-    if (this.state.liquidToBeRemoved > this.state.curPairInfo.userLiquid) {
+    if (new BigNumber(this.state.liquidToBeRemoved).gt(this.state.curPairInfo.userLiquid)) {
       Notification.displayWarningInfo("输入的流动性数值已大于您可移除的上限");
       return;
     }
-    this.setState({userRemovedLiquidVisible: false, txInfoVisible: true});
+    this.setState({userRemovedLiquidVisible: false, callbackFunc: this.removeLiquidity, txInfoVisible: true});
   }
 
   changeLiquidityOp = (v) => {
+    this.state.bLiquidOp = v;
+    this.updateToValue();
     this.setState({bLiquidOp: v});
+  }
+
+  showTxTable = () => {
+    this.setState({myTxInfoVisible: true})
+  }
+
+  showMiningInfo = () => {
+    this.getMiningOEXPerBlock();
+    this.getMyHavestOEX();
+    this.setState({miningVisible: true});
+  }
+
+  startHarvest = () => {
+    if (this.state.miningInfo.myHavestOEX  == 0) {
+      Notification.displayWarningInfo("您尚无矿可提取，请努力挖矿!");
+      return;
+    }
+    this.setState({callbackFunc: this.harvest, txInfoVisible: true});
+  }
+
+  showInnerTxs = async (internalActions) => {
+    const actions = [];
+    for (const internalAction of internalActions) {
+      let action = {};
+      action.actionType = txParser.getActionTypeStr(internalAction.action.type);
+      action.fromAccount = internalAction.action.from;
+      action.toAccount = internalAction.action.to;
+      action.assetId = internalAction.action.assetID;
+      action.value = await this.getValue(action.assetId, internalAction.action.value);
+      action.payload = internalAction.action.payload;
+      actions.push(action);
+    }
+    this.setState({
+      innerTxVisible: true,
+      innerTxInfos: actions,
+    })
+  }
+
+  processAssetInfo = (assetNo, value, index, record) => {
+    if (record.status == 0) return '-';
+    if (value.typeId == 0) {  // 添加流动性
+      var assetAmount = assetNo == 0 ? value.inAssetInfo.amount : value.outAssetInfo.amount;
+      assetAmount += ' ' + (assetNo == 0 ? value.inAssetInfo.assetInfo.symbol : value.outAssetInfo.assetInfo.symbol).toUpperCase();
+      return assetAmount;
+    }
+    if (value.typeId == 1) {  // 移除流动性
+      const actionOne = record.innerActions[0].action;
+      const actionTwo = record.innerActions[1].action;
+      const assetOneInfo = value.inAssetInfo.assetInfo;
+      const assetTwoInfo = value.outAssetInfo.assetInfo;
+      if (assetNo == 0) {
+        if (actionOne.assetID == assetOneInfo.assetid) {
+          return new BigNumber(actionOne.value).shiftedBy(assetOneInfo.decimals * -1).toString();
+        }
+        return new BigNumber(actionTwo.value).shiftedBy(assetOneInfo.decimals * -1).toString();
+      } else {
+        if (actionTwo.assetID == assetTwoInfo.assetid) {
+          return new BigNumber(actionTwo.value).shiftedBy(assetTwoInfo.decimals * -1).toString();
+        }
+        return new BigNumber(actionOne.value).shiftedBy(assetTwoInfo.decimals * -1).toString();
+      }
+      
+    }
+    if (value.typeId == 2) {  // 兑换
+      const actionOne = record.innerActions[0].action;
+      const actionTwo = record.innerActions[1].action;
+      var action = actionOne.value > 0 ? actionOne : actionTwo;
+      if (assetNo == 0) {
+        return value.inAssetInfo.amount;
+      } else {
+        return new BigNumber(action.value).shiftedBy(value.outAssetInfo.assetInfo.decimals * -1).toString();
+      }
+    }
+    if (value.typeId == 3) {  // 提取挖矿
+      
+    }
+  }
+
+  renderHash = (value) => {
+    const displayValue = value.substr(0, 8) + '...' + value.substr(value.length - 6);
+    return <a className='blockNumber' href={'https://oexchain.com/#/Transaction?' + value}>{displayValue}</a>;
   }
 
   render() {
@@ -541,80 +720,86 @@ export default class OexSwap extends Component {
     return (
       <div style={{backgroundColor: '#272a2f'}}>
         <Row justify='center' align='center' style={{height: window.innerHeight}}>
-          <div style={styles.card1}>
-            <div style={styles.card2}>
-              <div style={styles.assetAmounInfo}>
-                <font color='#fff'>From</font>
-                <div>
-                  <font color='#fff'>余额:</font>
-                  <font color='#fff'>{this.state.fromInfo.maxValue}</font>
-                </div>
-              </div>
-              <div style={{marginTop: '10px'}}>
-                <Input size='large' style={styles.input} value={this.state.fromInfo.value}
-                  //onChange={(v) => this.changeFromValue.bind(this)}
-                  onChange={(v) => {
-                    this.state.fromInfo.value = v;
-                    this.setState({fromInfo: this.state.fromInfo});
-                  }}
-                  onBlur={() => this.updateToValue()}
-                  innerAfter={fromAmountInput}
-                />
-              </div>
-            </div>   
-            <Button text type='primary' style={{marginTop: '20px'}} onClick={() => this.swapFromAndTo()}><Icon type='sorting'></Icon></Button>
-            <div style={styles.card2}>
-              <div style={styles.assetAmounInfo}>
-                <font color='#fff'>To</font>
-                <div>
-                  <font color='#fff'>余额:</font>
-                  <font color='#fff'>{this.state.toInfo.maxValue}</font>
-                </div>
-              </div>
-              <div style={{marginTop: '10px'}}>
-                <Input size='large' style={styles.input} value={this.state.toInfo.value}
-                  onChange={(v) => {
-                    this.state.toInfo.value = v;
-                    this.setState({toInfo: this.state.toInfo});
-                  }}
-                  innerAfter={toAmountInput}
-                />
-              </div>
-              {/* </div> */}
-            </div>   
-            <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
-              <font color='#fff'>可接受的最大滑点:</font>
-              <Select dataSource={toleranceData} defaultValue={this.state.selectedTolerance} style={{margin: '0 10px 0 10px', borderRadius:'10px'}} onChange={(v) => this.changeTolerance(v)}></Select>
-              <Input disabled={!this.state.toleranceInputEnable} value={this.state.inputTolerance} onChange={v => this.setState({inputTolerance: v})}
-                     style={{width: '60px', borderRadius:'10px'}} innerAfter='%'></Input>
-            </Row> 
-            <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
-              <font color='#fff'>兑换手续费: {this.state.feeRate / 10}%</font>              
-            </Row>
-            <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
-              <font color='#fff'>您的流动性占比: {this.state.curPairInfo.myPercent}%</font>  
-              {
-                this.state.curPairInfo.myPercent > 0 ?  
-                  <Button type='primary' className='maxButton' style={{marginLeft: '20px', width: '80px'}} onClick={() => this.startRemoveLiquidity()}>取回流动性</Button> : ''  
-              }        
-            </Row>
-            {
-              this.isPairNormal() > 0 ? 
-                <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
+          <div style={styles.card}>
+            <div style={styles.card1}>
+              <div style={styles.card2}>
+                <div style={styles.assetAmounInfo}>
+                  <font color='#fff'>From</font>
                   <div>
-                    <font color='#fff'>当前交易对信息: {this.state.pairAssetInfo}</font>
+                    <font color='#fff'>余额:</font>
+                    <font color='#fff'>{this.state.fromInfo.maxValue}</font>
                   </div>
-                </Row> : ''
-            }
-            
+                </div>
+                <div style={{marginTop: '10px'}}>
+                  <Input size='large' style={styles.input} value={this.state.fromInfo.value}
+                    //onChange={(v) => this.changeFromValue.bind(this)}
+                    onChange={(v) => {
+                      this.state.fromInfo.value = v;
+                      this.setState({fromInfo: this.state.fromInfo});
+                    }}
+                    onBlur={() => this.updateToValue()}
+                    innerAfter={fromAmountInput}
+                  />
+                </div>
+              </div>   
+              <Button text type='primary' style={{marginTop: '20px'}} onClick={() => this.swapFromAndTo()}><Icon type='sorting'></Icon></Button>
+              <div style={styles.card2}>
+                <div style={styles.assetAmounInfo}>
+                  <font color='#fff'>To</font>
+                  <div>
+                    <font color='#fff'>余额:</font>
+                    <font color='#fff'>{this.state.toInfo.maxValue}</font>
+                  </div>
+                </div>
+                <div style={{marginTop: '10px'}}>
+                  <Input size='large' style={styles.input} value={this.state.toInfo.value}
+                    onChange={(v) => {
+                      this.state.toInfo.value = v;
+                      this.setState({toInfo: this.state.toInfo});
+                    }}
+                    innerAfter={toAmountInput}
+                  />
+                </div>
+                {/* </div> */}
+              </div>   
+              <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
+                <font color='#fff'>可接受的最大滑点:</font>
+                <Select dataSource={toleranceData} defaultValue={this.state.selectedTolerance} style={{margin: '0 10px 0 10px', borderRadius:'10px'}} onChange={(v) => this.changeTolerance(v)}></Select>
+                <Input disabled={!this.state.toleranceInputEnable} value={this.state.inputTolerance} onChange={v => this.setState({inputTolerance: v})}
+                      style={{width: '60px', borderRadius:'10px'}} innerAfter='%'></Input>
+              </Row> 
+              <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
+                <font color='#fff'>兑换手续费: {this.state.feeRate / 10}%</font>              
+              </Row>
+              <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
+                <font color='#fff'>您的流动性占比: {this.state.curPairInfo.myPercent}%</font>  
+                {
+                  this.state.curPairInfo.myPercent > 0 ?  
+                    <Button type='primary' className='maxButton' style={{marginLeft: '20px', width: '80px'}} onClick={() => this.startRemoveLiquidity()}>取回流动性</Button> : ''  
+                }        
+              </Row>
+              {
+                this.isPairNormal() > 0 ? 
+                  <Row justify='start' align='center' style={{marginTop: '10px', paddingLeft: '20px', width: '100%'}}>
+                    <div>
+                      <font color='#fff'>当前交易对信息: {this.state.pairAssetInfo}</font>
+                    </div>
+                  </Row> : ''
+              }
+              
 
-            <Row justify='space-around' style={{ marginTop: '20px', width: '100%' }}>
-              <Button disabled={this.state.bLiquidOp} type='primary' style={styles.btn} onClick={() => this.startSwapAsset()}><font size="3">兑换</font></Button>
-              <div display='flex' justifyContent='start'>
-                <Checkbox onChange={(v) => this.changeLiquidityOp(v)}>''</Checkbox>
-                <Button disabled={!this.state.bLiquidOp} type='primary' style={styles.btn} onClick={() => this.startAddLiquidity()}><font size="3">提供流动性</font></Button>
-              </div>
-            </Row>
+              <Row justify='space-around' style={{ marginTop: '20px', width: '100%' }}>
+                <Button disabled={this.state.bLiquidOp} type='primary' style={styles.btn} onClick={() => this.startSwapAsset()}><font size="3">兑换</font></Button>
+                <div display='flex' justifyContent='start'>
+                  <Checkbox onChange={(v) => this.changeLiquidityOp(v)}>''</Checkbox>
+                  <Button disabled={!this.state.bLiquidOp} type='primary' style={styles.btn} onClick={() => this.startAddLiquidity()}><font size="3">提供流动性</font></Button>
+                </div>
+              </Row>
+            </div>
+            <div style={styles.lastLine}>
+              <Button text onClick={() => this.showTxTable()}><u>交易记录</u></Button>
+              <Button text onClick={() => this.showMiningInfo()}><u>挖矿信息</u></Button>
+            </div>
           </div>
 {/* 
           <Divider direction='ver' style={{backgroundColor: '#272a2f'}}/>
@@ -660,6 +845,31 @@ export default class OexSwap extends Component {
                  onPressEnter={() => this.onInputRemovedLiquidOK()}
                  />
         </Dialog>
+        <Dialog style={{ width: '600px', padding: 0, color: 'white'}}
+          visible={this.state.miningVisible}
+          title="挖矿信息"
+          footerAlign="center"
+          closeable="esc,mask,close"
+          onOk={() => this.setState({miningVisible: false})}
+          onCancel={() => this.setState({miningVisible: false})}
+          onClose={() => this.setState({miningVisible: false})}
+        >
+          <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px'}}>
+            当前每区块挖矿量: {this.state.miningInfo.curMiningOEX} OEX
+          </Row>
+          <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
+            我可提取的挖矿量: {this.state.miningInfo.curMiningOEX} OEX
+            <Button type='primary' style={{ marginLeft: '10px', borderRadius: '10px'}} onClick={() => this.startHarvest()}>提取</Button>
+          </Row>
+          <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
+            挖矿规则: <br/>
+            1: 交易对必须包含OEX <br/>
+            2: 参与此交易对账号数必须达到7个 <br/>
+            3: 每个账号按照参与交易的OEX数量瓜分每个区块产出的OEX <br/>
+            4: 所有交易对共享每个区块产出的OEX <br/>
+            5: 产出的OEX来自基金会，并非额外增发
+          </Row>
+        </Dialog>
         <Dialog style={{ width: '400px', padding: 0}}
           visible={this.state.txInfoVisible}
           title="发起交易"
@@ -697,6 +907,29 @@ export default class OexSwap extends Component {
             onPressEnter={this.onTxConfirmOK.bind(this)}
           />
         </Dialog>
+        <Dialog language={T('zh-cn')}
+          style={{ width: 800 }}
+          visible={this.state.myTxInfoVisible}
+          title={T("您的交易记录")}
+          footerActions="ok"
+          footerAlign="center"
+          closeable="true"
+          onOk={() => this.setState({myTxInfoVisible: false})}
+          onCancel={() => this.setState({myTxInfoVisible: false})}
+          onClose={() => this.setState({myTxInfoVisible: false})}
+        >
+            <IceContainer>
+              <Table dataSource={this.state.txInfoList} hasBorder={false} language={T('zh-cn')} resizable>
+                <Table.Column title={T("交易时间")} dataIndex="time" width={80}/>
+                <Table.Column title={T("交易hash")} dataIndex="txHash" width={80} cell={this.renderHash.bind(this)}/>
+                <Table.Column title={T("发起账号")} dataIndex="actionInfo" width={100} cell={actionInfo => actionInfo.accountName}/>
+                <Table.Column title={T("操作类型")} dataIndex="actionInfo" width={80} cell={actionInfo => actionInfo.typeName}/>
+                <Table.Column title={T("状态")} dataIndex="status" width={80} cell={v => v == 0 ? "失败" : '成功'}/>
+                <Table.Column title={T("资产1")} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 0)}/>
+                <Table.Column title={T("资产2")} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 1)}/>
+              </Table>
+            </IceContainer>
+        </Dialog>
       </div>
     );
   }
@@ -704,6 +937,11 @@ export default class OexSwap extends Component {
 
 
 const styles = {
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
   card1: {
     display: 'flex',
     flexDirection: 'column',
@@ -722,6 +960,16 @@ const styles = {
     marginTop: '20px',
     borderRadius:'10px',
     border: '1px solid rgba(255,255,255,0.3)'
+  },
+  lastLine: {
+    display: 'flex',
+    justifyContent: 'space-between', 
+    width: '100%', 
+    color: 'white',
+    marginTop: '10px',
+    padding: '0 10px'
+    //flexDirection: 'row',
+    //alignItems: 'center'
   },
   btn: {
     width: '150px', 

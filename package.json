@@ -43,7 +43,7 @@
     "monaco-editor": "^0.16.0",
     "monaco-editor-webpack-plugin": "^1.7.0",
     "natives": "^1.1.6",
-    "oex-web3": "^1.2.8",
+    "oex-web3": "^1.3.0",
     "path-to-regexp": "^2.2.1",
     "prop-types": "^15.6.2",
     "react": "^16.6.1",
