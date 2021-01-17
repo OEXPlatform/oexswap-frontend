@@ -126,6 +126,7 @@ export default class Header extends PureComponent {
           utils.storeDataToFile(constant.KeyStore, keystore);
           Feedback.toast.success(T('成功导入账户'));
           this.setState({accountConfigVisible: false, privateKey: '', password: ''});
+          location.reload(true);
         }).catch(error => Feedback.toast.error(T('账户导入失败')));
       } else {
         Feedback.toast.error(T('账户不存在'));

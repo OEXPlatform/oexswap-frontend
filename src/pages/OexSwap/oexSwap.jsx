@@ -39,7 +39,7 @@ export default class OexSwap extends Component {
     const txInfoList = utils.getDataFromFile(Constant.TxInfoFile);
     this.state = {
        account,
-       accountName: account.accountName,
+       accountName: account != null ? account.accountName : '',
        txInfoList: txInfoList != null ? txInfoList : [],
        fromInfo: {value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null},
        toInfo: {value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null},       
@@ -627,6 +627,10 @@ export default class OexSwap extends Component {
     this.setState({bLiquidOp: v});
   }
 
+  showAllPairs = () => {
+    this.setState({myTxInfoVisible: true})
+  }
+
   showTxTable = () => {
     this.setState({myTxInfoVisible: true})
   }
@@ -797,6 +801,7 @@ export default class OexSwap extends Component {
               </Row>
             </div>
             <div style={styles.lastLine}>
+              <Button text onClick={() => this.showAllPairs()}><u>所有交易对</u></Button>
               <Button text onClick={() => this.showTxTable()}><u>交易记录</u></Button>
               <Button text onClick={() => this.showMiningInfo()}><u>挖矿信息</u></Button>
             </div>
