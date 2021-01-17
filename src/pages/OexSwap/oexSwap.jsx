@@ -51,7 +51,7 @@ export default class OexSwap extends Component {
        pairMap: {},
        feeRate: 0,
        curPairInfo: {myPercent: 0},
-       contractName: 'oexswaptest010',
+       contractName: 'oexswaptest011',
        minerContractName: 'oexminertest011',
        liquidToBeRemoved: '',
        maxLiquidTip: '最多可移除的流动性数量:',
@@ -72,6 +72,7 @@ export default class OexSwap extends Component {
        liquidDecimals: 0,
        miningVisible: false,
        miningInfo: {curMiningOEX: 0, myHavestOEX: 0},
+       assetInfoMap: {}
      };
   }
 
@@ -116,6 +117,20 @@ export default class OexSwap extends Component {
           pairInfo.index = i;
           _this.state.pairList.push(pairInfo);
           _this.state.pairMap[pairInfo.firstAssetId + '-' + pairInfo.secondAssetId] = pairInfo;
+          if (this.state.assetInfoMap[pairInfo.firstAssetId] == null) {
+            oexchain.account.getAssetInfoById(pairInfo.firstAssetId).then(assetInfo => {
+              if (assetInfo != null) {
+                this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
+              }
+            })
+          }
+          if (this.state.assetInfoMap[pairInfo.secondAssetId] == null) {
+            oexchain.account.getAssetInfoById(pairInfo.secondAssetId).then(assetInfo => {
+              if (assetInfo != null) {
+                this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
+              }
+            })
+          }
         });
       }
     }).catch(err => console.log(err));
@@ -131,10 +146,11 @@ export default class OexSwap extends Component {
   getPairByIndex = async (pairIndex) => {
     const payloadInfo = {funcName:'pairList', types:['uint256'], values: [pairIndex]};
     const pairInfo = await oexchain.action.readContract(this.state.accountName, this.state.contractName, payloadInfo, 'latest');
-    const pairInfoElements = utils.parseResult(['uint', 'uint', 'uint', 'uint'], pairInfo);
-    console.log(pairInfoElements)
+    const pairInfoElements = utils.parseResult(['uint', 'uint', 'uint', 'uint', 'uint', 'uint'], pairInfo);
+    //console.log(pairInfoElements)
     return {firstAssetId: pairInfoElements[0], secondAssetId: pairInfoElements[1], 
-            firstAssetNumber: new BigNumber(pairInfoElements[2]), secondAssetNumber: new BigNumber(pairInfoElements[3])};
+            firstAssetNumber: new BigNumber(pairInfoElements[2]), secondAssetNumber: new BigNumber(pairInfoElements[3]),
+            totalLiquidOfFirstAsset: new BigNumber(pairInfoElements[4]), totalLiquidOfSecondAsset: new BigNumber(pairInfoElements[5])};
   }
 
   getPairByAssetId = async (firstAssetId, secondAssetId) => {
@@ -346,7 +362,7 @@ export default class OexSwap extends Component {
       return;
     }
     const balanceInfo = account.balances.find(v => v.assetID == tmpSelectAssetInfo.assetid);
-    const amount = balanceInfo != null ? new BigNumber(balanceInfo.balance).shiftedBy(tmpSelectAssetInfo.decimals * -1).toFixed(6) : 0;
+    const amount = balanceInfo != null ? new BigNumber(balanceInfo.balance).shiftedBy(tmpSelectAssetInfo.decimals * -1).toFixed(tmpSelectAssetInfo.decimals) : 0;
     if (isFromAsset) {
       fromInfo.selectAssetInfo = tmpSelectAssetInfo;
       fromInfo.selectAssetTip = tmpSelectAssetInfo.symbol.toUpperCase();
@@ -394,6 +410,28 @@ export default class OexSwap extends Component {
       }
       this.setState({curPairInfo});
     }
+  }
+
+  updateBaseInfoByPairInfo = async (curPairInfo, fromInfo, toInfo) => {
+    curPairInfo.exist = true;
+    const totalLiquid = await this.getPairTotalLiquid(curPairInfo.index);
+    const userLiquid = await this.getUserLiquidInPair(curPairInfo.index, this.state.account.accountID);
+    curPairInfo.totalLiquid = totalLiquid.multipliedBy(100);
+    curPairInfo.userLiquid = userLiquid.multipliedBy(100);
+    curPairInfo.myPercent = userLiquid.dividedBy(totalLiquid).multipliedBy(100).toFixed(2);
+
+    var firstAssetInfo = fromInfo.selectAssetInfo;
+    var secondAssetInfo = toInfo.selectAssetInfo;
+    this.state.liquidDecimals = firstAssetInfo.decimals;
+    curPairInfo.totalLiquid = curPairInfo.totalLiquid.shiftedBy(this.state.liquidDecimals * -1);
+    curPairInfo.userLiquid = curPairInfo.userLiquid.shiftedBy(this.state.liquidDecimals * -1);
+
+    const firstAssetAmount = curPairInfo.firstAssetNumber.shiftedBy(firstAssetInfo.decimals * -1).toFixed(6);
+    const secondAssetAmount = curPairInfo.secondAssetNumber.shiftedBy(secondAssetInfo.decimals * -1).toFixed(6);
+    this.state.pairAssetInfo = firstAssetAmount + ' ' + firstAssetInfo.symbol.toUpperCase() 
+                              + ' + ' 
+                              + secondAssetAmount + ' ' + secondAssetInfo.symbol.toUpperCase();
+    this.setState({pairAssetInfo: this.state.pairAssetInfo, curPairInfo});
   }
 
   getAssetDisplayInfo = (assetList) => {
@@ -628,7 +666,7 @@ export default class OexSwap extends Component {
   }
 
   showAllPairs = () => {
-    //this.setState({myTxInfoVisible: true})
+    this.setState({pairListVisible: true})
   }
 
   showTxTable = () => {
@@ -681,14 +719,14 @@ export default class OexSwap extends Component {
       const assetTwoInfo = value.outAssetInfo.assetInfo;
       if (assetNo == 0) {
         if (actionOne.assetID == assetOneInfo.assetid) {
-          return new BigNumber(actionOne.value).shiftedBy(assetOneInfo.decimals * -1).toString();
+          return new BigNumber(actionOne.value).shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase();
         }
-        return new BigNumber(actionTwo.value).shiftedBy(assetOneInfo.decimals * -1).toString();
+        return new BigNumber(actionTwo.value).shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase();
       } else {
         if (actionTwo.assetID == assetTwoInfo.assetid) {
-          return new BigNumber(actionTwo.value).shiftedBy(assetTwoInfo.decimals * -1).toString();
+          return new BigNumber(actionTwo.value).shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase();
         }
-        return new BigNumber(actionOne.value).shiftedBy(assetTwoInfo.decimals * -1).toString();
+        return new BigNumber(actionOne.value).shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase();
       }
       
     }
@@ -697,9 +735,9 @@ export default class OexSwap extends Component {
       const actionTwo = record.innerActions[1].action;
       var action = actionOne.value > 0 ? actionOne : actionTwo;
       if (assetNo == 0) {
-        return value.inAssetInfo.amount;
+        return value.inAssetInfo.amount + ' ' + value.inAssetInfo.assetInfo.symbol.toUpperCase();
       } else {
-        return new BigNumber(action.value).shiftedBy(value.outAssetInfo.assetInfo.decimals * -1).toString();
+        return new BigNumber(action.value).shiftedBy(value.outAssetInfo.assetInfo.decimals * -1).toString() + ' ' + value.outAssetInfo.assetInfo.symbol.toUpperCase();
       }
     }
     if (value.typeId == 3) {  // 提取挖矿
@@ -707,6 +745,66 @@ export default class OexSwap extends Component {
     }
   }
 
+  displayAssetInfo = (value, index, pairInfo) => {
+    const assetOneId = pairInfo.firstAssetId;
+    const assetTwoId = pairInfo.secondAssetId;
+    const assetOneInfo = this.state.assetInfoMap[assetOneId];
+    const assetTwoInfo = this.state.assetInfoMap[assetTwoId];
+    if (assetOneInfo != null && assetTwoInfo != null) {
+      return assetOneInfo.symbol.toUpperCase() + '[id:' + assetOneId + ']  -  ' + assetTwoInfo.symbol.toUpperCase() + '[id:' + assetTwoId + ']';
+    } else {
+      return '[id:' + assetOneId + ']  -  ' + '[id:' + assetTwoId + ']';
+    }
+  }
+
+  displayCurLiquid = (value, index, pairInfo) => {
+    const assetOneInfo = this.state.assetInfoMap[pairInfo.firstAssetId];
+    const assetTwoInfo = this.state.assetInfoMap[pairInfo.secondAssetId];
+    const assetOneLiquid = pairInfo.firstAssetNumber;
+    const assetTwoLiquid = pairInfo.secondAssetNumber;
+    if (assetOneInfo != null && assetTwoInfo != null) {
+      return assetOneLiquid.shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase() 
+              + ' + ' +
+             assetTwoLiquid.shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase();
+    } else {
+      return assetOneLiquid.toString() + ' + ' + assetTwoLiquid.toString() + '(注意此数值皆为资产对应的最小单位)';
+    }
+  }
+
+  displayTotalLiquid = (value, index, pairInfo) => {
+    const assetOneInfo = this.state.assetInfoMap[pairInfo.firstAssetId];
+    const assetTwoInfo = this.state.assetInfoMap[pairInfo.secondAssetId];
+    const assetOneLiquid = pairInfo.totalLiquidOfFirstAsset;
+    const assetTwoLiquid = pairInfo.totalLiquidOfSecondAsset;
+    if (assetOneInfo != null && assetTwoInfo != null) {
+      return assetOneLiquid.shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase()
+              + ' + ' +
+             assetTwoLiquid.shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase();
+    } else {
+      return assetOneLiquid.toString() + ' + ' + assetTwoLiquid.toString() + '(注意此数值皆为资产对应的最小单位)';
+    }
+  }
+
+  startEX = (value, index, pairInfo) => {
+    return <Button type='primary' onClick={() => this.startExchange(pairInfo)}>开始交易</Button>
+  }
+
+  startExchange = (pairInfo) => {
+    const assetOneInfo = this.state.assetInfoMap[pairInfo.firstAssetId];
+    const assetTwoInfo = this.state.assetInfoMap[pairInfo.secondAssetId];
+    const balanceInfoAssetOne = this.state.account.balances.find(v => v.assetID == pairInfo.firstAssetId);
+    const amountOfAssetOne = balanceInfoAssetOne != null ? new BigNumber(balanceInfoAssetOne.balance).shiftedBy(assetOneInfo.decimals * -1).toFixed(assetOneInfo.decimals) : 0;
+    const balanceInfoAssetTwo = this.state.account.balances.find(v => v.assetID == pairInfo.secondAssetId);
+    const amountOfAssetTwo = balanceInfoAssetTwo != null ? new BigNumber(balanceInfoAssetTwo.balance).shiftedBy(assetTwoInfo.decimals * -1).toFixed(assetTwoInfo.decimals) : 0;
+
+    assetOneInfo.assetid = assetOneInfo.assetId;
+    assetTwoInfo.assetid = assetTwoInfo.assetId;
+    const fromInfo = {value: '', maxValue: amountOfAssetOne, selectAssetTip: assetOneInfo.symbol.toUpperCase(), selectAssetInfo: assetOneInfo, tmpSelectAssetInfo: assetOneInfo}
+    const toInfo = {value: '', maxValue: amountOfAssetTwo, selectAssetTip: assetTwoInfo.symbol.toUpperCase(), selectAssetInfo: assetTwoInfo, tmpSelectAssetInfo: assetTwoInfo} 
+    
+    this.setState({fromInfo, toInfo, pairListVisible: false});
+    this.updateBaseInfoByPairInfo(pairInfo, fromInfo, toInfo);
+  }
   renderHash = (value) => {
     const displayValue = value.substr(0, 8) + '...' + value.substr(value.length - 6);
     return <a className='blockNumber' href={'https://oexchain.com/#/Transaction?' + value}>{displayValue}</a>;
@@ -935,11 +1033,31 @@ export default class OexSwap extends Component {
               </Table>
             </IceContainer>
         </Dialog>
+
+        <Dialog language={T('zh-cn')}
+          style={{ width: 800 }}
+          visible={this.state.pairListVisible}
+          title={T("所有交易对")}
+          footerActions="ok"
+          footerAlign="center"
+          closeable="true"
+          onOk={() => this.setState({pairListVisible: false})}
+          onCancel={() => this.setState({pairListVisible: false})}
+          onClose={() => this.setState({pairListVisible: false})}
+        >
+            <IceContainer>
+              <Table dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
+                <Table.Column title={T("交易对")} dataIndex="firstAssetId" width={80} cell={this.displayAssetInfo.bind(this)}/>
+                <Table.Column title={T("当前流通量")} dataIndex="firstAssetNumber" width={100} cell={this.displayCurLiquid.bind(this)}/>
+                <Table.Column title={T("总交易量")} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.displayTotalLiquid.bind(this)}/>
+                <Table.Column title={T("操作")} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.startEX.bind(this)}/>
+              </Table>
+            </IceContainer>
+        </Dialog>
       </div>
     );
   }
 }
-
 
 const styles = {
   card: {
