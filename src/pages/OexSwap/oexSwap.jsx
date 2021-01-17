@@ -51,7 +51,7 @@ export default class OexSwap extends Component {
        pairMap: {},
        feeRate: 0,
        curPairInfo: {myPercent: 0},
-       contractName: 'oexswaptest010',
+       contractName: 'oexswaptest011',
        minerContractName: 'oexminertest011',
        liquidToBeRemoved: '',
        maxLiquidTip: '最多可移除的流动性数量:',
