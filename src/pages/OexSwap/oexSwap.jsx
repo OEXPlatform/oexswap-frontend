@@ -52,7 +52,7 @@ export default class OexSwap extends Component {
        feeRate: 0,
        curPairInfo: {myPercent: 0},
        contractName: 'oexswaptest011',
-       minerContractName: 'oexminertest011',
+       minerContractName: 'oexminertest012',
        liquidToBeRemoved: '',
        maxLiquidTip: '最多可移除的流动性数量:',
        txInfoVisible: false,
@@ -71,7 +71,7 @@ export default class OexSwap extends Component {
        userRemovedLiquidVisible: false,
        liquidDecimals: 0,
        miningVisible: false,
-       miningInfo: {curMiningOEX: 0, myHavestOEX: 0},
+       miningInfo: {curMiningOEX: 0, myHavestOEX: 0, miningSettings: []},
        assetInfoMap: {}
      };
   }
@@ -247,6 +247,20 @@ export default class OexSwap extends Component {
       this.state.miningInfo.myHavestOEX = new BigNumber(reward).shiftedBy(-18).toString();
       this.setState({miningInfo: this.state.miningInfo});
     }).catch(err => console.log(err));
+  }
+
+  getMiningSettings = async () => {
+    var index = 0;
+    this.state.miningInfo.miningSettings = [];
+    while(true) {
+      let payloadInfo = {funcName:'rewardSettingList', types:['uint'], values: [index]};  // types和values即合约方法的参数类型和值
+      const miningSetting = await oexchain.action.readContract(this.state.accountName, this.state.minerContractName, payloadInfo, 'latest');
+      if (miningSetting == null || miningSetting == '0x') break;;
+      const miningSettingElements = utils.parseResult(['uint', 'uint'], miningSetting);
+      this.state.miningInfo.miningSettings.push({reward: miningSettingElements[0], startBlockNumber: miningSettingElements[1]});
+      index++;
+    }
+    this.setState({miningInfo: this.state.miningInfo});
   }
 
   harvest = (gasInfo, privateKey) => {
@@ -676,6 +690,7 @@ export default class OexSwap extends Component {
   showMiningInfo = () => {
     this.getMiningOEXPerBlock();
     this.getMyHavestOEX();
+    this.getMiningSettings();
     this.setState({miningVisible: true});
   }
 
@@ -787,6 +802,15 @@ export default class OexSwap extends Component {
 
   startEX = (value, index, pairInfo) => {
     return <Button type='primary' onClick={() => this.startExchange(pairInfo)}>开始交易</Button>
+  }
+
+  showMiningSettings = () => {
+    var miningSettingInfos = [];
+    this.state.miningInfo.miningSettings.map((miningSetting, index) => {
+      miningSettingInfos.push(<p>阶段{index + 1}: 从区块高度{miningSetting.startBlockNumber}开始，每个区块产出: 
+                          {new BigNumber(miningSetting.reward).shiftedBy(-18).toNumber()}  OEX</p>);               
+    })
+    return miningSettingInfos;
   }
 
   startExchange = (pairInfo) => {
@@ -964,8 +988,18 @@ export default class OexSwap extends Component {
             我可提取的挖矿量: {this.state.miningInfo.curMiningOEX} OEX
             <Button type='primary' style={{ marginLeft: '10px', borderRadius: '10px'}} onClick={() => this.startHarvest()}>提取</Button>
           </Row>
+          <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px'}}>
+            当前挖矿计划: 
+          </Row>
+          {this.state.miningInfo.miningSettings.map((miningSetting, index) => {
+                      return <Row style={{ color: 'white', marginLeft: '40px', marginTop: '10px'}}>
+                          阶段{index + 1}: 从区块高度{miningSetting.startBlockNumber}开始，每个区块产出: {new BigNumber(miningSetting.reward).shiftedBy(-18).toNumber()}  OEX
+                          </Row>;               
+          })}
           <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
             挖矿规则: <br/>
+          </Row>
+          <Row style={{ color: 'white', margin: '10px 0 0 40px', alignItems: 'center'}}>
             1: 交易对必须包含OEX <br/>
             2: 参与此交易对账号数必须达到7个 <br/>
             3: 每个账号按照参与交易的OEX数量瓜分每个区块产出的OEX <br/>
