@@ -628,7 +628,7 @@ export default class OexSwap extends Component {
   }
 
   showAllPairs = () => {
-    this.setState({myTxInfoVisible: true})
+    //this.setState({myTxInfoVisible: true})
   }
 
   showTxTable = () => {
