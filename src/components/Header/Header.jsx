@@ -66,6 +66,9 @@ export default class Header extends PureComponent {
     eventProxy.on('importAccountInfo', () => {
       this.setState({accountConfigVisible: true});
     });
+    if (this.state.accountName == '') {
+      this.setState({accountConfigVisible: true});
+    }
   }
   
   componentWillReceiveProps(nextProps) {
@@ -298,7 +301,7 @@ export default class Header extends PureComponent {
 
           <Dialog language={T('zh-cn')}
             visible={this.state.accountConfigVisible}
-            title={T("账号信息")}
+            title={T("导入账号信息")}
             footerActions="ok"
             footerAlign="center"
             closeable="true"
