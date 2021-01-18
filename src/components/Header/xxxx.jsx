@@ -1,7 +1,7 @@
 /* eslint-disable prefer-template */
 /* eslint jsx-a11y/no-noninteractive-element-interactions:0 */
 import React, { PureComponent } from 'react';
-import { Icon, Select, Dialog, Feedback, Grid } from '@icedesign/base';
+import { Icon, Select, Dialog, Feedback } from '@icedesign/base';
 import Layout from '@icedesign/layout';
 import StyledMenu, {
   Item as MenuItem,
@@ -13,7 +13,6 @@ import cookie from 'react-cookies';
 import axios from 'axios';
 import { createHashHistory } from 'history';
 import cx from 'classnames';
-import copy from 'copy-to-clipboard';
 import { Link } from 'react-router-dom';
 import * as oexchain from 'oex-web3';
 import { ethers } from 'ethers';
@@ -25,9 +24,8 @@ import * as utils from '../../utils/utils';
 import * as constant from '../../utils/constant';
 import { T, setLang } from '../../utils/lang';
 import eventProxy from '../../utils/eventProxy';
-import BigNumber from 'bignumber.js';
-// import { BigNumber } from 'ethers/utils';
-const {Row} = Grid;
+import styles from './scss/base.scss';
+
 export const history = createHashHistory();
 const keyMap = {'dashboard': '0', 'Block': '1', 'Transaction': '2', 'assetOperator': '3', 'contractDev': '4', 'producerList': '5'};
 
@@ -42,31 +40,16 @@ export default class Header extends PureComponent {
       nodeInfo = constant.mainNetRPCHttpsAddr;
     }
     const account = utils.getDataFromFile(constant.AccountObj);
-
-    var upAccountId = 0;
-    const index = window.location.href.indexOf('?id=');
-    if (index > -1)
-      upAccountId = parseInt(window.location.href.substr(index + 4));
-
     this.state = {
-      spreadContractName: 'spreadtest002',
-      minerContractName: 'oexminertest015',
-      upAccountId,
-      txInfoVisible: false,
       current: keyMap[props.location.pathname.substr(1)],
       nodeConfigVisible: false,
       accountConfigVisible: false,
-      spreadInfoDialogVisible: false,
-      account: account,
       accountName: account != null ? account.accountName : '',
       privateKey: '',
       password: '',
       nodeInfo,
       chainId: 0,
-      sysTokenID: 0,
-      callbackFunc: null,
       customNodeDisabled: true,
-      spreadInfo: {yourUrl: 'https://oexswap.com?id=' + account.accountID, downAccountNum: 0, downAccountNames: [], totalReward: 0},
       languages: [{value: 'ch', label:'中文'}, {value: 'en', label:'English'}],
       curLang: (defaultLang == null || defaultLang == 'ch') ? 'English' : '中文',
       defaultLang,
@@ -76,28 +59,9 @@ export default class Header extends PureComponent {
     };
     setLang(this.state.defaultLang);
   }
-  componentDidMount = async () => {
-    let nodeInfo = cookie.load('nodeInfo');
-    await oexchain.utils.setProvider(nodeInfo);
-
+  componentDidMount = () => {
     oexchain.oex.getChainConfig().then(chainConfig => {
       this.setState({chainId: chainConfig.chainId});
-      oexchain.oex.setChainConfig(chainConfig).then(() => {
-        this.getTotalReward(this.state.account.accountID).then(totalReward => this.state.spreadInfo.totalReward = totalReward);
-        this.getDownAccountsNumber(this.state.account.accountID).then(number => {
-          this.state.spreadInfo.downAccountNum = number;
-          for (var i = 0; i < number; i++) {
-            this.getDownAccount(this.state.account.accountID, i).then(accountId => {
-              oexchain.account.getAccountById(accountId).then(account => {
-                if (account != null) {
-                  this.state.spreadInfo.downAccountNames.push(account.accountName);
-                }
-              })
-            });
-          }
-        });
-
-      });
     })
     eventProxy.on('importAccountInfo', () => {
       this.setState({accountConfigVisible: true});
@@ -105,45 +69,10 @@ export default class Header extends PureComponent {
     if (this.state.accountName == '') {
       this.setState({accountConfigVisible: true});
     }
-    
   }
   
   componentWillReceiveProps(nextProps) {
     this.setState({current: keyMap[nextProps.location.pathname.substr(1)]});
-  }
-
-
-  getTotalReward = async (accountId) => {
-    let payloadInfo = {funcName:'accountSpreadRewardMap', types:['address'], values: [accountId]};  // types和values即合约方法的参数类型和值
-    const totalReward = await oexchain.action.readContract(this.state.accountName, this.state.minerContractName, payloadInfo, 'latest');
-    return new BigNumber(totalReward).shiftedBy(-18).toNumber();
-  }
-
-  getUpAccount = async (accountId) => {
-    let payloadInfo = {funcName:'getUpAccount', types:['address'], values: [accountId]};  // types和values即合约方法的参数类型和值
-    const upAccountId = await oexchain.action.readContract(this.state.accountName, this.state.spreadContractName, payloadInfo, 'latest');
-    return upAccountId == '0x' ? 0 : new BigNumber(upAccountId).toNumber();
-  }
-
-  getDownAccountsNumber = async (accountId) => {
-    let payloadInfo = {funcName:'getDownAccountsNumber', types:['address'], values: [accountId]};  // types和values即合约方法的参数类型和值
-    const number = await oexchain.action.readContract(this.state.accountName, this.state.spreadContractName, payloadInfo, 'latest');
-    return new BigNumber(number).toNumber();
-  }
-
-  getDownAccount = async (accountId, index) => {
-    let payloadInfo = {funcName:'getDownAccount', types:['address', 'uint'], values: [accountId, index]};  // types和values即合约方法的参数类型和值
-    const number = await oexchain.action.readContract(this.state.accountName, this.state.spreadContractName, payloadInfo, 'latest');
-    return new BigNumber(number).toNumber();
-  }
-
-  registerUpAccount = async (gasInfo, privateKey) => {
-    const { accountName, contractName } = this.state;
-    let actionInfo = {accountName, toAccountName: this.state.spreadContractName, assetId: 0, amount: new BigNumber(0), remark: ''}
-   
-    let payloadInfo = {funcName:'registerUpAccount', types:['address'], values: ['0x' + new BigNumber(this.state.upAccountId).toString(16)]};
-
-    return oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey);
   }
 
   openSetDialog = () => {
@@ -200,37 +129,12 @@ export default class Header extends PureComponent {
           utils.storeDataToFile(constant.KeyStore, keystore);
           Feedback.toast.success(T('成功导入账户'));
           this.setState({accountConfigVisible: false, privateKey: '', password: ''});
-          //
-          if (this.state.upAccountId > 0) {
-            oexchain.account.getAccountById(this.state.upAccountId).then(upAccount => {
-              if (upAccount != null) {
-                this.processUpAccount(account.accountID, privateKey).then(txhash => {
-                  console.log(txhash);
-                  location.reload(true);
-                })
-              } else {
-                location.reload(true);
-              }
-            });
-          } else {
-            location.reload(true);
-          }
-          
+          location.reload(true);
         }).catch(error => Feedback.toast.error(T('账户导入失败')));
       } else {
         Feedback.toast.error(T('账户不存在'));
       }
     });
-  }
-
-  processUpAccount = async (accountId, privateKey) => {
-    return this.getUpAccount(accountId).then(upAccountId => {
-      if (upAccountId == 0) {
-        const gasInfo = {gasPrice: '0x' + new BigNumber(100).shiftedBy(9).toString(16), 
-                         gasLimit: '0x' + new BigNumber(1000000).toString(16)}
-        return this.registerUpAccount(gasInfo, privateKey);
-      }
-    })
   }
 
   handleAccountNameChange = (v) => {
@@ -245,10 +149,6 @@ export default class Header extends PureComponent {
     this.setState({password: v});
   }
 
-  handleUpAccountNameChange = (v) => {
-    this.setState({upAccountName: v});
-  }
-
   handleClick = e => {
     this.setState({
       current: e.key
@@ -260,11 +160,6 @@ export default class Header extends PureComponent {
       accountConfigVisible: true
     });
     //history.push('/AccountManager');
-  }
-
-  copyValue = (value) => {
-    copy(value);
-    Feedback.toast.success(T('已复制到粘贴板'));
   }
 
   render() {
@@ -363,8 +258,15 @@ export default class Header extends PureComponent {
             {T('当前账号')}:{this.state.accountName == '' ? '尚未导入' : this.state.accountName}
           </Balloon>
           &nbsp;&nbsp;
-          {/* <Button text type="normal" style={{color: '#808080', marginLeft: '30px'}} onClick={this.onChangeLanguage.bind(this)}>{this.state.curLang}</Button> */}
-          <Button text type="normal" style={{color: '#808080', marginLeft: '30px'}} onClick={() => this.setState({spreadInfoDialogVisible: true})}>邀请奖励</Button>
+          <Button text type="normal" style={{color: '#808080', marginLeft: '30px'}} onClick={this.onChangeLanguage.bind(this)}>{this.state.curLang}</Button>
+          {/* &nbsp;&nbsp;
+          <Select language={T('zh-cn')}
+            style={{ width: 100 }}
+            placeholder={T("语言")}
+            onChange={this.onChangeLanguage.bind(this)}
+            dataSource={this.state.languages}
+            defaultValue={this.state.defaultLang}
+          /> */}
           <Dialog language={T('zh-cn')}
             visible={this.state.nodeConfigVisible}
             title={T("配置需连接的节点")}
@@ -430,7 +332,6 @@ export default class Header extends PureComponent {
             <br />
             <br />
             <Input htmlType="password" hasClear
-              onPressEnter={this.onConfigAcountOK.bind(this)}
               onChange={this.handlePasswordChange.bind(this)}
               style={{ width: 300 }}
               innerBefore={T("密码")}
@@ -440,30 +341,75 @@ export default class Header extends PureComponent {
               hasLimitHint
             />
           </Dialog>
-          <Dialog style={{ width: '600px', padding: 0, color: 'white'}}
-            visible={this.state.spreadInfoDialogVisible}
-            title="推广信息"
-            footerAlign="center"
-            closeable="esc,mask,close"
-            onOk={() => this.setState({spreadInfoDialogVisible: false})}
-            onCancel={() => this.setState({spreadInfoDialogVisible: false})}
-            onClose={() => this.setState({spreadInfoDialogVisible: false})}
+
+          {/* <Search
+            style={{ fontSize: '12px' }}
+            size="large"
+            inputWidth={400}
+            searchText="Search"
+            placeholder="Search by Address / Txhash / Block / Token / Ens"
+          /> */}
+          
+
+          {/* Header 右侧内容块 */}
+
+          {/* <Balloon
+            visible={false}
+            trigger={
+              <div
+                className="ice-design-header-userpannel"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 12,
+                }}
+              >
+                <IceImg
+                  height={40}
+                  width={40}
+                  src={
+                    profile.avatar ||
+                    'https://img.alicdn.com/tfs/TB1L6tBXQyWBuNjy0FpXXassXXa-80-80.png'
+                  }
+                  className="user-avatar"
+                />
+                <div className="user-profile">
+                  <span className="user-name" style={{ fontSize: '13px' }}>
+                    {profile.name}
+                  </span>
+                  <br />
+                  <span
+                    className="user-department"
+                    style={{ fontSize: '12px', color: '#999' }}
+                  >
+                    {profile.department}
+                  </span>
+                </div>
+                <Icon
+                  type="arrow-down-filling"
+                  size="xxs"
+                  className="icon-down"
+                />
+              </div>
+            }
+            closable={false}
+            className="user-profile-menu"
           >
-            <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px', alignItems: 'center'}}>
-              您的推广链接: {this.state.spreadInfo.yourUrl}
-              <Button type='primary' style={{ marginLeft: '10px', borderRadius: '10px'}} onClick={() => this.copyValue(this.state.spreadInfo.yourUrl)}>复制</Button>
-            </Row>
-            <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
-              总推广用户数: {this.state.spreadInfo.downAccountNum} 
-            </Row>
-            <Row style={{ color: 'white', marginLeft: '20px', marginTop: '10px'}}>
-               {this.state.spreadInfo.downAccountNames.map(name => name + ', ')}
-            </Row>
-            
-            <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
-              推广奖励: {this.state.spreadInfo.totalReward} 
-            </Row>
-          </Dialog>
+            <ul>
+              <li className="user-profile-menu-item">
+                <FoundationSymbol type="person" size="small" />我的主页
+              </li>
+              <li className="user-profile-menu-item">
+                <FoundationSymbol type="repair" size="small" />设置
+              </li>
+              <li
+                className="user-profile-menu-item"
+                onClick={this.props.handleLogout}
+              >
+                <FoundationSymbol type="compass" size="small" />退出
+              </li>
+            </ul>
+          </Balloon> */}
         </div>
       </Layout.Header>
     );
