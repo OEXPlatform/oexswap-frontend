@@ -66,7 +66,7 @@ export default class Header extends PureComponent {
       sysTokenID: 0,
       callbackFunc: null,
       customNodeDisabled: true,
-      spreadInfo: {yourUrl: 'https://oexswap.com?id=' + account.accountID, downAccountNum: 0, downAccountNames: [], totalReward: 0},
+      spreadInfo: {yourUrl: account == null ? '登录账户后才能生成您的推广链接' : 'https://oexswap.com?id=' + account.accountID, downAccountNum: 0, downAccountNames: [], totalReward: 0},
       languages: [{value: 'ch', label:'中文'}, {value: 'en', label:'English'}],
       curLang: (defaultLang == null || defaultLang == 'ch') ? 'English' : '中文',
       defaultLang,
@@ -83,20 +83,21 @@ export default class Header extends PureComponent {
     oexchain.oex.getChainConfig().then(chainConfig => {
       this.setState({chainId: chainConfig.chainId});
       oexchain.oex.setChainConfig(chainConfig).then(() => {
-        this.getTotalReward(this.state.account.accountID).then(totalReward => this.state.spreadInfo.totalReward = totalReward);
-        this.getDownAccountsNumber(this.state.account.accountID).then(number => {
-          this.state.spreadInfo.downAccountNum = number;
-          for (var i = 0; i < number; i++) {
-            this.getDownAccount(this.state.account.accountID, i).then(accountId => {
-              oexchain.account.getAccountById(accountId).then(account => {
-                if (account != null) {
-                  this.state.spreadInfo.downAccountNames.push(account.accountName);
-                }
-              })
-            });
-          }
-        });
-
+        if (this.state.account != null) {
+          this.getTotalReward(this.state.account.accountID).then(totalReward => this.state.spreadInfo.totalReward = totalReward);
+          this.getDownAccountsNumber(this.state.account.accountID).then(number => {
+            this.state.spreadInfo.downAccountNum = number;
+            for (var i = 0; i < number; i++) {
+              this.getDownAccount(this.state.account.accountID, i).then(accountId => {
+                oexchain.account.getAccountById(accountId).then(account => {
+                  if (account != null) {
+                    this.state.spreadInfo.downAccountNames.push(account.accountName);
+                  }
+                })
+              });
+            }
+          });
+        }
       });
     })
     eventProxy.on('importAccountInfo', () => {
