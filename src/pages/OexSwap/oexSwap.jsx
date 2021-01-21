@@ -17,6 +17,8 @@ import './ui.scss';
 const { Row, Col } = Grid;
 // const oexLogo =
 const oexToken = require('./images/oexToken.png');
+const PNG_max = require('./images/max.png');
+const PNG_transfer = require('./images/transfer.png');
 const otherToken = require('./images/otherToken.png');
 
 const toleranceData = [
@@ -908,26 +910,20 @@ export default class OexSwap extends Component {
   render() {
     const fromAmountInput = (
       <div style={styles.amountInfo}>
-        <Button size="small" className="maxButton" onClick={() => this.inputMaxFromAmount()}>
-          {' '}
-          Max{' '}
-        </Button>
-        <Button type="primary" size="large" className="ui-assetSelectButton" onClick={() => this.selectFromAsset()}>
-          {' '}
-          {this.state.fromInfo.selectAssetTip} <Icon size="small" type="arrow-down" />
-        </Button>
+        <div className="ui-assetSelectButton" onClick={() => this.selectFromAsset()}>
+          <span>{this.state.fromInfo.selectAssetTip}</span>
+          <Icon size="small" type="arrow-down" />
+        </div>
+        <img src={PNG_max} style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => this.inputMaxFromAmount()} />
       </div>
     );
     const toAmountInput = (
       <div style={styles.amountInfo}>
-        <Button size="small" className="maxButton" onClick={() => this.inputMaxToAmount()}>
-          {' '}
-          Max{' '}
-        </Button>
-        <Button type="primary" size="large" className="ui-assetSelectButton" onClick={() => this.selectToAsset()}>
-          {' '}
-          {this.state.toInfo.selectAssetTip} <Icon size="small" type="arrow-down" />
-        </Button>
+        <div className="ui-assetSelectButton" onClick={() => this.selectToAsset()}>
+          <span>{this.state.toInfo.selectAssetTip}</span>
+          <Icon size="small" type="arrow-down" />
+        </div>
+        <img src={PNG_max} style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => this.inputMaxToAmount()} />
       </div>
     );
     return (
@@ -935,18 +931,18 @@ export default class OexSwap extends Component {
         <Row justify="center" align="center" style={{ height: window.innerHeight }}>
           <div style={styles.card}>
             <div style={styles.card1}>
-              <div style={styles.card2}>
+              <div className="ui-card2">
                 <div style={styles.assetAmounInfo}>
-                  <font>From</font>
                   <div>
-                    <font>余额:</font>
+                    <font>余额：</font>
                     <font>{this.state.fromInfo.maxValue}</font>
                   </div>
+                  <font>支付</font>
                 </div>
-                <div style={{ marginTop: '10px' }}>
+                <div>
                   <Input
                     size="large"
-                    style={styles.input}
+                    className="ui-card2-input"
                     value={this.state.fromInfo.value}
                     //onChange={(v) => this.changeFromValue.bind(this)}
                     onChange={(v) => {
@@ -958,21 +954,19 @@ export default class OexSwap extends Component {
                   />
                 </div>
               </div>
-              <Button text type="primary" style={{ marginTop: '20px' }} onClick={() => this.swapFromAndTo()}>
-                <Icon type="sorting"></Icon>
-              </Button>
-              <div style={styles.card2}>
+              <img src={PNG_transfer} style={{ marginTop: '18px', cursor: 'pointer' }} onClick={() => this.swapFromAndTo()} />
+              <div className="ui-card2" style={{ marginTop: '10px' }}>
                 <div style={styles.assetAmounInfo}>
-                  <font>To</font>
                   <div>
-                    <font>余额:</font>
+                    <font>余额：</font>
                     <font>{this.state.toInfo.maxValue}</font>
                   </div>
+                  <font>获取</font>
                 </div>
-                <div style={{ marginTop: '10px' }}>
+                <div>
                   <Input
                     size="large"
-                    style={styles.input}
+                    className="ui-card2-input"
                     value={this.state.toInfo.value}
                     onChange={(v) => {
                       this.state.toInfo.value = v;
@@ -983,24 +977,27 @@ export default class OexSwap extends Component {
                 </div>
                 {/* </div> */}
               </div>
-              <Row justify="start" align="center" style={{ marginTop: '10px', paddingLeft: '20px', width: '100%' }}>
+              <Row justify="start" align="center" className="ui-swap-info-row" style={{ marginTop: '22px' }}>
                 <font>可接受的最大滑点:</font>
-                <Select
-                  dataSource={toleranceData}
-                  defaultValue={this.state.selectedTolerance}
-                  style={{ margin: '0 10px 0 10px', borderRadius: '10px' }}
-                  onChange={(v) => this.changeTolerance(v)}></Select>
                 <Input
                   disabled={!this.state.toleranceInputEnable}
                   value={this.state.inputTolerance}
                   onChange={(v) => this.setState({ inputTolerance: v })}
-                  style={{ width: '60px', borderRadius: '10px' }}
+                  className="ui-inputTolerance"
                   innerAfter="%"></Input>
+                <Select
+                  popupClassName="ui-swap-tolerance-select-popup"
+                  dataSource={toleranceData}
+                  defaultValue={this.state.selectedTolerance}
+                  className="ui-swap-tolerance-select"
+                  onChange={(v) => this.changeTolerance(v)}
+                />
               </Row>
-              <Row justify="start" align="center" style={{ marginTop: '10px', paddingLeft: '20px', width: '100%' }}>
-                <font>兑换手续费: {this.state.feeRate / 10}%</font>
+              <Row justify="start" align="center" className="ui-swap-info-row">
+                <font>兑换手续费 {this.state.feeRate / 10}%</font>
+                <div style={{ float: 'right' }}>0.3 OEX</div>
               </Row>
-              <Row justify="start" align="center" style={{ marginTop: '10px', paddingLeft: '20px', width: '100%' }}>
+              <Row justify="start" align="center" className="ui-swap-info-row">
                 <font>您的流动性占比: {this.state.curPairInfo.myPercent}%</font>
                 {this.state.curPairInfo.myPercent > 0 ? (
                   <Button type="primary" className="maxButton" style={{ marginLeft: '20px', width: '80px' }} onClick={() => this.startRemoveLiquidity()}>
@@ -1020,27 +1017,27 @@ export default class OexSwap extends Component {
                 ''
               )}
 
-              <Row justify="space-around" style={{ marginTop: '20px', width: '100%' }}>
-                <Button disabled={this.state.bLiquidOp} type="primary" style={styles.btn} onClick={() => this.startSwapAsset()}>
-                  <font size="3">兑换</font>
+              <div display="flex" class="ui-swap-bLiquidOp" justifyContent="start">
+                <Checkbox onChange={(v) => this.changeLiquidityOp(v)}></Checkbox>
+                <Button disabled={!this.state.bLiquidOp} type="primary" onClick={() => this.startAddLiquidity()}>
+                  <font size="3">提供流动性</font>
                 </Button>
-                <div display="flex" justifyContent="start">
-                  <Checkbox onChange={(v) => this.changeLiquidityOp(v)}>''</Checkbox>
-                  <Button disabled={!this.state.bLiquidOp} type="primary" style={styles.btn} onClick={() => this.startAddLiquidity()}>
-                    <font size="3">提供流动性</font>
-                  </Button>
-                </div>
-              </Row>
+              </div>
+
+              <Button className="ui-swap-submit" disabled={this.state.bLiquidOp} type="primary" onClick={() => this.startSwapAsset()}>
+                <font size="3">兑换</font>
+              </Button>
             </div>
+
             <div style={styles.lastLine}>
-              <Button text onClick={() => this.showAllPairs()}>
-                <u>所有交易对</u>
+              <Button text style={{ color: '#00c9a7' }} onClick={() => this.showAllPairs()}>
+                所有交易对&gt;
               </Button>
-              <Button text onClick={() => this.showTxTable()}>
-                <u>交易记录</u>
+              <Button text style={{ color: '#00c9a7' }} onClick={() => this.showTxTable()}>
+                交易记录&gt;
               </Button>
-              <Button text onClick={() => this.showMiningInfo()}>
-                <u>挖矿信息</u>
+              <Button text style={{ color: '#00c9a7' }} onClick={() => this.showMiningInfo()}>
+                挖矿信息&gt;
               </Button>
             </div>
           </div>
@@ -1225,21 +1222,13 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    height: '500px',
-    width: '450px',
+    height: '510px',
+    width: '394px',
     backgroundColor: '#fff',
     borderRadius: '36px',
     marginTop: '-100px',
     boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.16)',
-  },
-  card2: {
-    height: '100px',
-    width: '400px',
-    backgroundColor: '#fff',
-    marginTop: '20px',
-    borderRadius: '10px',
-    color: '#8687A3',
-    border: '1px solid rgba(255,255,255,0.3)',
+    position: 'relative',
   },
   lastLine: {
     display: 'flex',
@@ -1250,14 +1239,6 @@ const styles = {
     padding: '0 10px',
     //flexDirection: 'row',
     //alignItems: 'center'
-  },
-  btn: {
-    width: '150px',
-    height: '50px',
-    borderRadius: '10px',
-    backgroundColor: '#3080FE',
-    color: '#fff',
-    border: '1px solid rgba(255,255,255,0)',
   },
   assetBtn: {
     marginTop: '20px',
@@ -1297,14 +1278,5 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     height: '100%',
-  },
-  input: {
-    borderRadius: '10px',
-    width: '95%',
-    color: '#fff !important',
-    backgroundColor: '#F2F3F4',
-    margin: '10px 10px 0 10px',
-    // border: '0 solid rgba(255,255,255,0)',
-    border: 'none',
   },
 };
