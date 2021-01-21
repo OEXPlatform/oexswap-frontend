@@ -1,0 +1,159 @@
+.ui-assetSelectButton {
+  display: flex;
+  color: #141426;
+  font-size: 16px;
+  height: 32px;
+  line-height: 32px;
+  font-weight: 400;
+  cursor: pointer;
+  span {
+    margin-right: 9px;
+  }
+  .next-icon {
+    font-weight: 400;
+    margin-right: 14px;
+  }
+  // &:hover {
+  //   // border: 1px solid #fff !important;
+  //   background-color: rgba(0, 0, 0, 0.2) !important;
+  // }
+}
+.ui-card2 {
+  width: 342px;
+  background-color: #fff;
+  margin-top: 25px;
+  border-radius: 10px;
+  color: #8687a3;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  .ui-card2-input {
+    width: 342px;
+    height: 60px;
+    background: #f2f3f4;
+    border-radius: 10px;
+    border: none;
+    margin-top: 4px;
+    input {
+      height: 100% !important;
+      color: #141426;
+      font-size: 24px;
+    }
+  }
+}
+// 兑换按钮
+.ui-swap-submit {
+  width: 340px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  background-color: #00c9a7 !important;
+  border-radius: 100px !important;
+  position: absolute;
+  bottom: 25px;
+  box-shadow: 0 0 4px 0 rgba(#00c9a7, 0.5);
+}
+// 提供流动性
+.ui-swap-bLiquidOp {
+  width: 100%;
+  text-align: right;
+  position: absolute;
+  bottom: 84px;
+  right: 28px;
+  button {
+    border: none !important;
+    background-color: transparent !important;
+  }
+  .next-checkbox-wrapper {
+    top: -2px;
+    position: relative;
+    &.checked > .next-checkbox > .next-checkbox-inner,
+    &.checked.focused > .next-checkbox > .next-checkbox-inner {
+      background-color: #00c9a7 !important;
+    }
+  }
+
+  .next-btn.next-btn-primary,
+  .next-btn.next-btn-primary:link,
+  .next-btn.next-btn-primary:visited,
+  .next-btn.next-btn-primary.visited {
+    color: #00c9a7 !important;
+  }
+  .next-btn.disabled.next-btn-primary,
+  .next-btn.disabled.next-btn-primary:link,
+  .next-btn.disabled.next-btn-primary:visited,
+  .next-btn.disabled.next-btn-primary.visited,
+  .next-btn[disabled].next-btn-primary,
+  .next-btn[disabled].next-btn-primary:link,
+  .next-btn[disabled].next-btn-primary:visited,
+  .next-btn[disabled].next-btn-primary.visited {
+    color: #e0e0e0 !important;
+  }
+}
+.ui-swap-info-row {
+  color: #8687a3;
+  font-size: 12px;
+  padding-left: 28px;
+  padding-right: 28px;
+  line-height: 30px;
+  width: 100%;
+  overflow: hidden;
+  display: block;
+  .ui-swap-tolerance-select {
+    margin-right: 10px;
+    border-radius: 100px;
+    border-color: #00c9a7 !important;
+    color: #00c9a7;
+    padding-left: 12px !important;
+    min-width: 80px;
+    width: 80px;
+    height: 24px !important;
+    line-height: 24px !important;
+    font-size: 12px;
+    float: right;
+    margin-top: 3px;
+    // font-weight: bold;
+    i {
+      color: #00c9a7 !important;
+      margin-right: 3px;
+      margin-top: -11px !important;
+      // font-weight: bold !important;
+    }
+  }
+  .ui-inputTolerance {
+    margin-top: 3px;
+    float: right;
+    border: 1px solid #ccc;
+    width: 60px;
+    border-radius: 100px;
+    background-color: #fff;
+    line-height: 24px;
+    height: 24px !important;
+    display: block;
+    line-height: calc((28px - 1px * 2));
+    position: relative;
+    .next-input-inner {
+      position: absolute;
+      top: 5px;
+      right: 16px;
+    }
+  }
+}
+// 选择滑点下拉
+.ui-swap-tolerance-select-popup {
+  min-width: 80px;
+  border-color: #00c9a7;
+  .next-menu-item.selected {
+    color: #00c9a7;
+  }
+  .next-menu-icon-select {
+    color: #00c9a7;
+  }
+  .next-menu-item:not(.next-disabled):hover,
+  .next-menu-item:not(.next-disabled).next-selected:hover,
+  .next-menu-item:not(.next-disabled).next-selected.next-focused:hover,
+  .next-menu-item:not(.next-disabled).next-selected:focus:hover,
+  .next-menu-item:not(.next-disabled).next-focused,
+  .next-menu-item:not(.next-disabled).next-selected.next-focused,
+  .next-menu-item:not(.next-disabled).next-selected:focus {
+    color: #00c9a7;
+  }
+}
