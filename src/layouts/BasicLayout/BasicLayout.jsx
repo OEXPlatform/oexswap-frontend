@@ -23,8 +23,7 @@ import Footer from './../../components/Footer';
 import Logo from './../../components/Logo';
 import { asideMenuConfig } from './../../menuConfig';
 import { routerData } from '../../routerConfig';
-import './scss/light.scss';
-import './scss/dark.scss';
+import './scss/ui.scss';
 
 const { AuthorizedRoute } = Authorized;
 const defaultLang = cookie.load('defaultLang');
@@ -162,13 +161,10 @@ class BasicLayout extends Component {
             key={index}
             title={
               <span>
-                {item.icon ? (
-                  <FoundationSymbol size="small" type={item.icon} />
-                ) : null}
+                {item.icon ? <FoundationSymbol size="small" type={item.icon} /> : null}
                 {/* <span className="ice-menu-collapse-hide">{T(item.name)}</span> */}
               </span>
-            }
-          >
+            }>
             {childrenItems}
           </SubMenu>
         );
@@ -179,9 +175,7 @@ class BasicLayout extends Component {
         <MenuItem key={item.path}>
           <Link to={item.path}>
             <span>
-              {item.icon ? (
-                <FoundationSymbol size="small" type={item.icon} />
-              ) : null}
+              {item.icon ? <FoundationSymbol size="small" type={item.icon} /> : null}
               {/* <span className="ice-menu-collapse-hide">{T(item.name)}</span> */}
             </span>
           </Link>
@@ -225,41 +219,19 @@ class BasicLayout extends Component {
     const { pathname } = location;
 
     return (
-      <Layout
-        style={{ minHeight: '100vh' }}
-        className={cx(`ice-design-header-aside-footer-layout-${theme}`, {
-          'ice-design-layout': true,
-        })}
-      >
-        <Header
-          theme={theme}
-          isMobile={this.state.isScreen !== 'isDesktop'}
-          profile={profile}
-          handleLogout={this.props.userLogout}
-          location={location}
-        />
-        <Layout.Section className="ice-design-layout-body">                    
+      <Layout className={cx(`ui-basic-layout`)}>
+        <Header theme={theme} isMobile={this.state.isScreen !== 'isDesktop'} profile={profile} handleLogout={this.props.userLogout} location={location} />
+        <Layout.Section className="ice-design-layout-body">
           {/* 主体内容 */}
           <Layout.Main>
             <Switch>
               {routerData.map((item, index) => {
-                return item.component ? (
-                  <AuthorizedRoute
-                    key={index}
-                    path={item.path}
-                    component={item.component}
-                    exact={item.exact}
-                    authority={item.authority}
-                    redirectPath="exception/403"
-                  />
-                ) : null;
+                return item.component ? <AuthorizedRoute key={index} path={item.path} component={item.component} exact={item.exact} authority={item.authority} redirectPath="exception/403" /> : null;
               })}
 
               {/* 路由重定向 */}
               {redirectData.map((item, index) => {
-                return (
-                  <Redirect key={index} exact from={item.from} to={item.to} />
-                );
+                return <Redirect key={index} exact from={item.from} to={item.to} />;
               })}
 
               {/* 首页默认重定向到 /contractDev */}
@@ -282,10 +254,7 @@ const mapStateToProps = (state) => {
   return { profile: state.profile, logout: state.logout };
 };
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 const withProfileReducer = injectReducer({
   key: 'profile',
@@ -297,8 +266,4 @@ const withLogoutReducer = injectReducer({
   reducer: logoutReducer,
 });
 
-export default compose(
-  withProfileReducer,
-  withLogoutReducer,
-  withConnect
-)(BasicLayout);
+export default compose(withProfileReducer, withLogoutReducer, withConnect)(BasicLayout);
