@@ -70,6 +70,12 @@
       background-color: #00c9a7 !important;
     }
   }
+  .next-checkbox-wrapper:not(.disabled):hover > .next-checkbox > .next-checkbox-inner,
+  .next-checkbox-wrapper.hovered > .next-checkbox > .next-checkbox-inner,
+  .next-checkbox-wrapper.focused > .next-checkbox > .next-checkbox-inner {
+    border-color: #00c9a7;
+    background-color: rgba(#00c9a7, 0.2);
+  }
 
   .next-btn.next-btn-primary,
   .next-btn.next-btn-primary:link,
