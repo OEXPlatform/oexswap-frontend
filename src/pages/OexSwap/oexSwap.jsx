@@ -985,7 +985,7 @@ export default class OexSwap extends Component {
             当前每区块挖矿量: {this.state.miningInfo.curMiningOEX} OEX
           </Row>
           <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
-            我可提取的挖矿量: {this.state.miningInfo.curMiningOEX} OEX
+            我可提取的挖矿量: {this.state.miningInfo.myHavestOEX} OEX
             <Button type='primary' style={{ marginLeft: '10px', borderRadius: '10px'}} onClick={() => this.startHarvest()}>提取</Button>
           </Row>
           <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px'}}>
