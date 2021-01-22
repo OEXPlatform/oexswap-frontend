@@ -12,19 +12,20 @@ export default class Logo extends PureComponent {
     };
   }
   componentDidMount = () => {
-    oexchain.oex.getChainConfig().then(chainConfig => {
+    oexchain.oex.getChainConfig().then((chainConfig) => {
       let networkType = T('私网');
       if (chainConfig.chainId == 1) {
         networkType = T('主网');
       } else if (chainConfig.chainId >= 100 && chainConfig.chainId <= 200) {
         networkType = T('测试网');
       }
-      this.setState({networkType});
-    })
-  }
+      this.setState({ networkType });
+    });
+  };
   render() {
     return (
       <div className="logo">
+        <img src={logo} />
         <Link to="/" className="logo-text">
           OEXSwap
         </Link>
