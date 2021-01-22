@@ -490,10 +490,10 @@ export default class OexSwap extends Component {
     const { fromInfo, toInfo, isFromAsset } = this.state;
     const assetDisplayList = assetList.map((assetInfo) => {
       const symbol = assetInfo.symbol.toUpperCase();
-      var backgroundColor = '#1a1e3e';
       const tmpSelectAssetInfo = isFromAsset ? fromInfo.tmpSelectAssetInfo : toInfo.tmpSelectAssetInfo;
+      const classNames = ['ui-assetInfo'];
       if (tmpSelectAssetInfo != null && tmpSelectAssetInfo.assetid == assetInfo.assetid) {
-        backgroundColor = 'rgba(48, 128, 254, 1)';
+        classNames.push('ui-select');
       }
       var needBtn = true;
       if (isFromAsset) {
@@ -506,18 +506,18 @@ export default class OexSwap extends Component {
         }
       }
       return (
-        <div className="assetInfo" style={{ backgroundColor }}>
-          <Row align="center" style={{ marginTop: '15px' }}>
-            <img src={assetInfo.assetid == 0 ? oexToken : otherToken} style={{ marginRight: '5px' }} />
-            <font>{symbol}</font>
-            <font>[id:{assetInfo.assetid}]</font>
-          </Row>
-          <font style={{ marginTop: '10px' }}>{assetInfo.assetName}</font>
-          <font style={{ marginTop: '10px' }}>持有账户数: {assetInfo.stats}</font>
+        <div className={classNames.join(' ')}>
+          <font class="ui-assetInfo-account">持有账户数: {assetInfo.stats}</font>
+          <img src={assetInfo.assetid == 0 ? oexToken : otherToken} />
+          <div className="ui-assetInfo-symbol">
+            {symbol}
+            <span>ID:{assetInfo.assetid}</span>
+          </div>
+          <span>{assetInfo.assetName}</span>
           {needBtn ? (
-            <Button type="normal" style={styles.assetBtn} onClick={() => this.clickAsset(assetInfo)}>
+            <div className="ui-btn" onClick={() => this.clickAsset(assetInfo)}>
               选择此资产
-            </Button>
+            </div>
           ) : (
             ''
           )}
@@ -1049,26 +1049,46 @@ export default class OexSwap extends Component {
           </Card> */}
         </Row>
         <Dialog
-          style={{ width: '600px', padding: 0 }}
+          className="ui-dialog"
+          hasMask={false}
           visible={this.state.assetSelectorDialogVisible}
-          title="选择资产"
-          footerAlign="center"
-          closeable="esc,mask,close"
-          onOk={this.onSelectAssetOK.bind(this)}
-          onCancel={() => this.setState({ assetSelectorDialogVisible: false })}
-          onClose={() => this.setState({ assetSelectorDialogVisible: false })}>
-          <Input
-            autoFocus
-            placeholder="通过资产ID/资产全名搜索资产"
-            style={{ width: '100%' }}
-            innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} style={{}} />}
-            value={this.state.assetContent}
-            onChange={(v) => this.setState({ assetContent: v })}
-            onPressEnter={() => this.searchAsset()}
-          />
-          <Row wrap justify="start" style={{ width: '100%' }}>
-            {this.state.assetDisplayList.map((assetInfo) => assetInfo)}
-          </Row>
+          // title="选择资产"
+          // footerAlign="center"
+          footer={false}
+          closeable={false}
+          // onOk={this.onSelectAssetOK.bind(this)}
+          // onCancel={() => this.setState({ assetSelectorDialogVisible: false })}
+          // onClose={() => this.setState({ assetSelectorDialogVisible: false })}
+        >
+          <div className="ui-SelectAsset ui-dialog-content">
+            <div className="ui-SelectAsset-body ui-dialog-body">
+              <div class="ui-dialog-header">
+                <div className="ui-dialog-title">选择资产</div>
+                <div className="ui-dialog-search">
+                  <Input
+                    autoFocus
+                    placeholder="通过资产ID/资产全名搜索资产"
+                    innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} style={{}} />}
+                    value={this.state.assetContent}
+                    onChange={(v) => this.setState({ assetContent: v })}
+                    onPressEnter={() => this.searchAsset()}
+                  />
+                </div>
+              </div>
+              <Row wrap justify="start" className="ui-dialog-data">
+                {this.state.assetDisplayList.map((assetInfo) => assetInfo)}
+              </Row>
+              <div className="ui-footer-padding"></div>
+            </div>
+            <div className="ui-dialog-btns">
+              <div className="ui-submit" onClick={this.onSelectAssetOK.bind(this)}>
+                确定
+              </div>
+              <div className="ui-cancel" onClick={() => this.setState({ assetSelectorDialogVisible: false })}>
+                取消
+              </div>
+            </div>
+          </div>
         </Dialog>
         <Dialog
           style={{ width: '600px', padding: 0 }}
@@ -1239,15 +1259,6 @@ const styles = {
     padding: '0 10px',
     //flexDirection: 'row',
     //alignItems: 'center'
-  },
-  assetBtn: {
-    marginTop: '20px',
-    width: '100px',
-    height: '30px',
-    borderRadius: '10px',
-    backgroundColor: '#4090FE',
-    color: '#fff',
-    border: '1px solid rgba(255,255,255,0)',
   },
   maxBtn: {
     display: 'flex',
