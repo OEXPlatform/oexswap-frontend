@@ -6,6 +6,7 @@ import * as oexchain from 'oex-web3';
 import * as ethers from 'ethers';
 import cookie from 'react-cookies';
 import BigNumber from 'bignumber.js';
+import cx from 'classnames';
 
 import * as utils from '../../utils/utils';
 import * as Notification from '../../utils/notification';
@@ -506,7 +507,7 @@ export default class OexSwap extends Component {
         }
       }
       return (
-        <div className={classNames.join(' ')}>
+        <div className={classNames.join(' ')} style={{ cursor: needBtn ? 'pointer' : 'default' }} onClick={() => needBtn && this.clickAsset(assetInfo)}>
           <font class="ui-assetInfo-account">持有账户数: {assetInfo.stats}</font>
           <img src={assetInfo.assetid == 0 ? oexToken : otherToken} />
           <div className="ui-assetInfo-symbol">
@@ -931,6 +932,14 @@ export default class OexSwap extends Component {
         <Row justify="center" align="center" style={{ height: window.innerHeight }}>
           <div style={styles.card}>
             <div style={styles.card1}>
+              <div className="ui-swap-tab">
+                <div className={cx({ 'ui-select': !this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(false)}>
+                  兑换
+                </div>
+                <div className={cx({ 'ui-select': this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(true)}>
+                  流动性
+                </div>
+              </div>
               <div className="ui-card2">
                 <div style={styles.assetAmounInfo}>
                   <div>
@@ -1017,15 +1026,8 @@ export default class OexSwap extends Component {
                 ''
               )}
 
-              <div display="flex" class="ui-swap-bLiquidOp" justifyContent="start">
-                <Checkbox onChange={(v) => this.changeLiquidityOp(v)}></Checkbox>
-                <Button disabled={!this.state.bLiquidOp} type="primary" onClick={() => this.startAddLiquidity()}>
-                  <font size="3">提供流动性</font>
-                </Button>
-              </div>
-
-              <Button className="ui-swap-submit" disabled={this.state.bLiquidOp} type="primary" onClick={() => this.startSwapAsset()}>
-                <font size="3">兑换</font>
+              <Button className="ui-swap-submit" type="primary" onClick={() => (this.state.bLiquidOp ? this.startAddLiquidity() : this.startSwapAsset())}>
+                <font size="3">{this.state.bLiquidOp ? '提供流动性' : '兑换'}</font>
               </Button>
             </div>
 

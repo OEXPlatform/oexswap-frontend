@@ -163,3 +163,35 @@
     color: #00c9a7;
   }
 }
+.ui-swap-tab {
+  padding-top: 32px;
+  color: #8687a3;
+  font-size: 12px;
+  display: flex;
+  > div {
+    width: 150px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-indent: 2px;
+    transition: all ease 0.4s;
+    &:after {
+      content: ' ';
+      height: 4px;
+      display: block;
+      border-radius: 2px;
+      margin: 0 auto;
+      transition: all ease 0.4s;
+      width: 0px;
+    }
+    &.ui-select {
+      color: #00c9a7;
+      font-size: 16px;
+      &:after {
+        background-color: #00c9a7;
+        width: 48px;
+      }
+    }
+  }
+}
