@@ -1236,6 +1236,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    marginTop: '100px',
   },
   card1: {
     display: 'flex',

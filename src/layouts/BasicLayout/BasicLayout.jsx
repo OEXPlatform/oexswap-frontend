@@ -239,7 +239,7 @@ class BasicLayout extends Component {
             </Switch>
           </Layout.Main>
         </Layout.Section>
-        {/* <Footer /> */}
+        <Footer />
       </Layout>
     );
   }

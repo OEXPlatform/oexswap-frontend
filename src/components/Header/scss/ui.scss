@@ -1,11 +1,14 @@
 .ui-layout-header {
   height: 60px;
+  width: 100%;
   line-height: 60px;
   background-color: #ffffff;
   overflow: hidden;
   padding-left: 140px;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
   border-bottom: 3px solid rgba(#23c9a7, 0.62);
+  position: fixed;
+  z-index: 20;
 
   .ui-layout-header-menu {
     float: right;
