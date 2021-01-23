@@ -27,8 +27,8 @@
     .ui-dialog-body {
       overflow: hidden;
       background: #ffffff;
-      box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
       border-radius: 20px;
+      box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
 
       .ui-dialog-header {
         height: 66px;
@@ -38,7 +38,6 @@
         position: relative;
         // border-bottom: 1px solid #c9cace;
         z-index: 3;
-        box-shadow: 0px -3px 6px rgba(0, 0, 0, 1);
         .ui-dialog-title {
           padding-left: 20px;
           color: #000;
@@ -127,11 +126,16 @@
     }
   }
 }
+
+// 选择资产
 .ui-SelectAsset {
   width: 810px;
-  .ui-SelectAsset-body {
+  .ui-dialog-body {
     width: 810px;
     height: 615px;
+    .ui-dialog-header {
+      box-shadow: 0px -3px 6px rgba(0, 0, 0, 1);
+    }
   }
 }
 .ui-assetInfo {
@@ -221,6 +225,42 @@
       background-color: #fff;
       color: #00c9a7;
       box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+    }
+  }
+}
+
+.ui-pairList {
+  width: 1088px;
+  .ui-dialog-body {
+    width: 1088px;
+    height: 615px;
+    .ui-dialog-data {
+      padding-top: 0px !important;
+      position: relative;
+      .ui-pairList-tr {
+        height: 33px;
+        width: 100%;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        background-color: #f2f3f4;
+      }
+      .next-table {
+        .next-table-header {
+          tr {
+            th {
+              border-bottom: none;
+              .next-table-cell-wrapper {
+                color: #f2f3f4;
+                line-height: 33px;
+                background-color: #f2f3f4;
+                padding: 0 16px;
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

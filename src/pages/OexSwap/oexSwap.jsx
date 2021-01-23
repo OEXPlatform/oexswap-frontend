@@ -508,7 +508,7 @@ export default class OexSwap extends Component {
       }
       return (
         <div className={classNames.join(' ')} style={{ cursor: needBtn ? 'pointer' : 'default' }} onClick={() => needBtn && this.clickAsset(assetInfo)}>
-          <font class="ui-assetInfo-account">持有账户数: {assetInfo.stats}</font>
+          <font className="ui-assetInfo-account">持有账户数: {assetInfo.stats}</font>
           <img src={assetInfo.assetid == 0 ? oexToken : otherToken} />
           <div className="ui-assetInfo-symbol">
             {symbol}
@@ -913,7 +913,7 @@ export default class OexSwap extends Component {
       <div style={styles.amountInfo}>
         <div className="ui-assetSelectButton" onClick={() => this.selectFromAsset()}>
           <span>{this.state.fromInfo.selectAssetTip}</span>
-          <Icon size="small" type="arrow-down" />
+          <Icon type="arrow-down" />
         </div>
         <img src={PNG_max} style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => this.inputMaxFromAmount()} />
       </div>
@@ -922,7 +922,7 @@ export default class OexSwap extends Component {
       <div style={styles.amountInfo}>
         <div className="ui-assetSelectButton" onClick={() => this.selectToAsset()}>
           <span>{this.state.toInfo.selectAssetTip}</span>
-          <Icon size="small" type="arrow-down" />
+          <Icon type="arrow-down" />
         </div>
         <img src={PNG_max} style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => this.inputMaxToAmount()} />
       </div>
@@ -1007,7 +1007,8 @@ export default class OexSwap extends Component {
                 <div style={{ float: 'right' }}>0.3 OEX</div>
               </Row>
               <Row justify="start" align="center" className="ui-swap-info-row">
-                <font>您的流动性占比: {this.state.curPairInfo.myPercent}%</font>
+                <font>您的流动性占比:</font>
+                <div style={{ float: 'right' }}>{this.state.curPairInfo.myPercent}%</div>
                 {this.state.curPairInfo.myPercent > 0 ? (
                   <Button type="primary" className="maxButton" style={{ marginLeft: '20px', width: '80px' }} onClick={() => this.startRemoveLiquidity()}>
                     取回流动性
@@ -1050,21 +1051,10 @@ export default class OexSwap extends Component {
 
           </Card> */}
         </Row>
-        <Dialog
-          className="ui-dialog"
-          hasMask={false}
-          visible={this.state.assetSelectorDialogVisible}
-          // title="选择资产"
-          // footerAlign="center"
-          footer={false}
-          closeable={false}
-          // onOk={this.onSelectAssetOK.bind(this)}
-          // onCancel={() => this.setState({ assetSelectorDialogVisible: false })}
-          // onClose={() => this.setState({ assetSelectorDialogVisible: false })}
-        >
+        <Dialog className="ui-dialog" hasMask={false} visible={this.state.assetSelectorDialogVisible} footer={false} closeable={false}>
           <div className="ui-SelectAsset ui-dialog-content">
-            <div className="ui-SelectAsset-body ui-dialog-body">
-              <div class="ui-dialog-header">
+            <div className="ui-dialog-body">
+              <div className="ui-dialog-header">
                 <div className="ui-dialog-title">选择资产</div>
                 <div className="ui-dialog-search">
                   <Input
@@ -1117,20 +1107,17 @@ export default class OexSwap extends Component {
           title="挖矿信息"
           footerAlign="center"
           closeable="esc,mask,close"
-          onOk={() => this.setState({miningVisible: false})}
-          onCancel={() => this.setState({miningVisible: false})}
-          onClose={() => this.setState({miningVisible: false})}
-        >
-          <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px'}}>
-            当前每区块挖矿量: {this.state.miningInfo.curMiningOEX} OEX
-          </Row>
-          <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center'}}>
+          onOk={() => this.setState({ miningVisible: false })}
+          onCancel={() => this.setState({ miningVisible: false })}
+          onClose={() => this.setState({ miningVisible: false })}>
+          <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px' }}>当前每区块挖矿量: {this.state.miningInfo.curMiningOEX} OEX</Row>
+          <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center' }}>
             我可提取的挖矿量: {this.state.miningInfo.myHavestOEX} OEX
-            <Button type='primary' style={{ marginLeft: '10px', borderRadius: '10px'}} onClick={() => this.startHarvest()}>提取</Button>
+            <Button type="primary" style={{ marginLeft: '10px', borderRadius: '10px' }} onClick={() => this.startHarvest()}>
+              提取
+            </Button>
           </Row>
-          <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px'}}>
-            当前挖矿计划: 
-          </Row>
+          <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px' }}>当前挖矿计划:</Row>
           <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px' }}>当前挖矿计划:</Row>
           {this.state.miningInfo.miningSettings.map((miningSetting, index) => {
             return (
@@ -1213,25 +1200,31 @@ export default class OexSwap extends Component {
           </IceContainer>
         </Dialog>
 
-        <Dialog
-          language={T('zh-cn')}
-          style={{ width: 800 }}
-          visible={this.state.pairListVisible}
-          title={T('所有交易对')}
-          footerActions="ok"
-          footerAlign="center"
-          closeable="true"
-          onOk={() => this.setState({ pairListVisible: false })}
-          onCancel={() => this.setState({ pairListVisible: false })}
-          onClose={() => this.setState({ pairListVisible: false })}>
-          <IceContainer>
-            <Table dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
-              <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={80} cell={this.displayAssetInfo.bind(this)} />
-              <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={100} cell={this.displayCurLiquid.bind(this)} />
-              <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.displayTotalLiquid.bind(this)} />
-              <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.startEX.bind(this)} />
-            </Table>
-          </IceContainer>
+        <Dialog className="ui-dialog" hasMask={false} footer={false} closeable={false} language={T('zh-cn')} visible={this.state.pairListVisible}>
+          <div className="ui-pairList ui-dialog-content">
+            <div className="ui-dialog-body">
+              <div className="ui-dialog-header">
+                <div className="ui-dialog-title">{T('所有交易对')}</div>
+              </div>
+              <IceContainer className="ui-dialog-data">
+                <div class="ui-pairList-tr"></div>
+                <Table dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
+                  <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={80} cell={this.displayAssetInfo.bind(this)} />
+                  <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={100} cell={this.displayCurLiquid.bind(this)} />
+                  <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.displayTotalLiquid.bind(this)} />
+                  <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.startEX.bind(this)} />
+                </Table>
+              </IceContainer>
+            </div>
+            <div className="ui-dialog-btns">
+              <div className="ui-submit" onClick={() => this.setState({ pairListVisible: false })}>
+                确定
+              </div>
+              <div className="ui-cancel" onClick={() => this.setState({ pairListVisible: false })}>
+                取消
+              </div>
+            </div>
+          </div>
         </Dialog>
       </div>
     );
