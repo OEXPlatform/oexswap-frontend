@@ -1207,7 +1207,7 @@ export default class OexSwap extends Component {
                 <div className="ui-dialog-title">{T('所有交易对')}</div>
               </div>
               <IceContainer className="ui-dialog-data">
-                <div class="ui-pairList-tr"></div>
+                <div className="ui-pairList-tr"></div>
                 <Table dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
                   <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={80} cell={this.displayAssetInfo.bind(this)} />
                   <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={100} cell={this.displayCurLiquid.bind(this)} />

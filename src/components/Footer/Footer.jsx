@@ -36,9 +36,9 @@ export default class Footer extends PureComponent {
         </div>
         <div className="uilayout-copyright">
           <span>© 2019 Theme designed by oex.com</span>
-          <span class="line">|</span>
+          <span className="line">|</span>
           <span>冀ICP备2020025490号</span>
-          <span class="line">|</span>
+          <span className="line">|</span>
           <span>oexfund@gmail.com</span>
         </div>
       </Layout.Footer>
