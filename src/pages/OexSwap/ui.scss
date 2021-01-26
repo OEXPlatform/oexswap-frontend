@@ -215,6 +215,11 @@
   font-size: 16px;
   color: #141426;
   overflow: hidden;
+  transition: all ease 0.2s;
+  &:hover {
+    background-color: #dddddd;
+  }
+  cursor: pointer;
   div {
     float: left;
   }

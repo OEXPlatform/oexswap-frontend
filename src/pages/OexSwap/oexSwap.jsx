@@ -795,48 +795,6 @@ export default class OexSwap extends Component {
     });
   };
 
-  processAssetInfo = (assetNo, value, index, record) => {
-    if (record.status == 0) return '-';
-    if (value.typeId == 0) {
-      // 添加流动性
-      var assetAmount = assetNo == 0 ? value.inAssetInfo.amount : value.outAssetInfo.amount;
-      assetAmount += ' ' + (assetNo == 0 ? value.inAssetInfo.assetInfo.symbol : value.outAssetInfo.assetInfo.symbol).toUpperCase();
-      return assetAmount;
-    }
-    if (value.typeId == 1) {
-      // 移除流动性
-      const actionOne = record.innerActions[0].action;
-      const actionTwo = record.innerActions[1].action;
-      const assetOneInfo = value.inAssetInfo.assetInfo;
-      const assetTwoInfo = value.outAssetInfo.assetInfo;
-      if (assetNo == 0) {
-        if (actionOne.assetID == assetOneInfo.assetid) {
-          return new BigNumber(actionOne.value).shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase();
-        }
-        return new BigNumber(actionTwo.value).shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase();
-      } else {
-        if (actionTwo.assetID == assetTwoInfo.assetid) {
-          return new BigNumber(actionTwo.value).shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase();
-        }
-        return new BigNumber(actionOne.value).shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase();
-      }
-    }
-    if (value.typeId == 2) {
-      // 兑换
-      const actionOne = record.innerActions[0].action;
-      const actionTwo = record.innerActions[1].action;
-      var action = actionOne.value > 0 ? actionOne : actionTwo;
-      if (assetNo == 0) {
-        return value.inAssetInfo.amount + ' ' + value.inAssetInfo.assetInfo.symbol.toUpperCase();
-      } else {
-        return new BigNumber(action.value).shiftedBy(value.outAssetInfo.assetInfo.decimals * -1).toString() + ' ' + value.outAssetInfo.assetInfo.symbol.toUpperCase();
-      }
-    }
-    if (value.typeId == 3) {
-      // 提取挖矿
-    }
-  };
-
   displayAssetInfo = (value, index, pairInfo) => {
     const assetOneId = pairInfo.firstAssetId;
     const assetTwoId = pairInfo.secondAssetId;
@@ -928,14 +886,6 @@ export default class OexSwap extends Component {
 
     this.setState({ fromInfo, toInfo, pairListVisible: false });
     this.updateBaseInfoByPairInfo(pairInfo, fromInfo, toInfo);
-  };
-  renderHash = (value) => {
-    const displayValue = value.substr(0, 8) + '...' + value.substr(value.length - 6);
-    return (
-      <a className="blockNumber" href={'https://oexchain.com/#/Transaction?' + value}>
-        {displayValue}
-      </a>
-    );
   };
 
   render() {
@@ -1051,10 +1001,10 @@ export default class OexSwap extends Component {
               {this.state.bLiquidOp ? (
                 <Row justify="start" align="center" className="ui-swap-info-row">
                   <font>流动池数量</font>
-                  <span style={{ marginLeft: '10px', color: '#00C9A7' }}>资金池详情&gt;</span>
+                  <span style={{ marginLeft: '10px', color: '#00C9A7', cursor: 'pointer' }}>资金池详情&gt;</span>
                   {this.state.pairAssetInfo}
                   {this.isPairNormal() > 0 && (
-                    <div className="ui-my-pairInfo">
+                    <div className="ui-my-pairInfo" onClick={() => this.startRemoveLiquidity()}>
                       <div></div>
                       <div>我的做市</div>
                       <div>&gt;</div>
@@ -1111,14 +1061,13 @@ export default class OexSwap extends Component {
               <Row wrap justify="start" className="ui-dialog-data">
                 {this.state.assetDisplayList.map((assetInfo) => assetInfo)}
               </Row>
-              <div className="ui-footer-padding"></div>
-            </div>
-            <div className="ui-dialog-btns">
-              <div className="ui-submit" onClick={this.onSelectAssetOK.bind(this)}>
-                确定
-              </div>
-              <div className="ui-cancel" onClick={() => this.setState({ assetSelectorDialogVisible: false })}>
-                取消
+              <div className="ui-dialog-btns">
+                <div className="ui-submit" onClick={this.onSelectAssetOK.bind(this)}>
+                  确定
+                </div>
+                <div className="ui-cancel" onClick={() => this.setState({ assetSelectorDialogVisible: false })}>
+                  取消
+                </div>
               </div>
             </div>
           </div>
@@ -1219,29 +1168,30 @@ export default class OexSwap extends Component {
         </Dialog>
 
         <Dialog className="ui-dialog" hasMask={false} footer={false} closeable={false} language={T('zh-cn')} visible={this.state.myTxInfoVisible}>
-          <div className="ui-pairList ui-dialog-content">
+          <div className="ui-txInfoList ui-dialog-content">
             <div className="ui-dialog-body">
               <div className="ui-dialog-header">
                 <div className="ui-dialog-title">{T('交易记录')}</div>
               </div>
               <IceContainer className="ui-dialog-data">
+                <div className="ui-pairList-tr"></div>
                 <Table dataSource={this.state.txInfoList} hasBorder={false} language={T('zh-cn')} resizable>
-                  <Table.Column title={T('交易时间')} dataIndex="time" width={80} />
-                  <Table.Column title={T('交易hash')} dataIndex="txHash" width={80} cell={this.renderHash.bind(this)} />
-                  <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={100} cell={(actionInfo) => actionInfo.accountName} />
-                  <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={80} cell={(actionInfo) => actionInfo.typeName} />
-                  <Table.Column title={T('状态')} dataIndex="status" width={80} cell={(v) => (v == 0 ? '失败' : '成功')} />
-                  <Table.Column title={T('资产1')} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 0)} />
-                  <Table.Column title={T('资产2')} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 1)} />
+                  <Table.Column title={T('交易时间')} dataIndex="time" width={144} cell={txInfoColume.time} />
+                  <Table.Column title={T('交易哈希值')} dataIndex="txHash" width={200} cell={txInfoColume.txHash} />
+                  <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={140} cell={txInfoColume.accountName} />
+                  <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={140} cell={txInfoColume.typeName} />
+                  <Table.Column title={T('状态')} dataIndex="status" width={110} cell={txInfoColume.status} />
+                  <Table.Column title={T('资产1')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 0)} />
+                  <Table.Column title={T('资产2')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 1)} />
                 </Table>
               </IceContainer>
-            </div>
-            <div className="ui-dialog-btns">
-              <div className="ui-submit" onClick={() => this.setState({ myTxInfoVisible: false })}>
-                确定
-              </div>
-              <div className="ui-cancel" onClick={() => this.setState({ myTxInfoVisible: false })}>
-                取消
+              <div className="ui-dialog-btns">
+                <div className="ui-submit" onClick={() => this.setState({ myTxInfoVisible: false })}>
+                  确定
+                </div>
+                <div className="ui-cancel" onClick={() => this.setState({ myTxInfoVisible: false })}>
+                  取消
+                </div>
               </div>
             </div>
           </div>
@@ -1255,20 +1205,20 @@ export default class OexSwap extends Component {
               </div>
               <IceContainer className="ui-dialog-data">
                 <div className="ui-pairList-tr"></div>
-                <Table dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
+                <Table fixedHeader={true} maxBodyHeight="484px" dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
                   <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={230} cell={this.displayAssetInfo.bind(this)} />
                   <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={260} cell={this.displayCurLiquid.bind(this)} />
                   <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={410} cell={this.displayTotalLiquid.bind(this)} />
                   <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={120} cell={this.startEX.bind(this)} />
                 </Table>
               </IceContainer>
-            </div>
-            <div className="ui-dialog-btns">
-              <div className="ui-submit" onClick={() => this.setState({ pairListVisible: false })}>
-                确定
-              </div>
-              <div className="ui-cancel" onClick={() => this.setState({ pairListVisible: false })}>
-                取消
+              <div className="ui-dialog-btns">
+                <div className="ui-submit" onClick={() => this.setState({ pairListVisible: false })}>
+                  确定
+                </div>
+                <div className="ui-cancel" onClick={() => this.setState({ pairListVisible: false })}>
+                  取消
+                </div>
               </div>
             </div>
           </div>
@@ -1336,5 +1286,68 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     height: '100%',
+  },
+};
+
+// 交易记录列数据渲染
+const txInfoColume = {
+  time: (value) => (
+    <div style={{ fontSize: '12px' }}>
+      <span style={{ color: '#141426' }}>{value.replace(/\ (.*)/, '').replace(/\//g, '-')}</span>
+      <span style={{ marginLeft: '4px', color: '#8687A3' }}>{value.replace(/(.*)\ /, '')}</span>
+    </div>
+  ),
+  txHash: (value) => (
+    <a style={{ color: '#23C9A7', fontSize: '12px' }} className="blockNumber" href={'https://oexchain.com/#/Transaction?' + value}>
+      {value.substr(0, 8) + '...' + value.substr(value.length - 6)}
+    </a>
+  ),
+  accountName: (info) => <span style={{ color: '#141426', fontSize: '12px' }}>{info.accountName}</span>,
+  typeName: (info) => <span style={{ color: '#141426', fontSize: '12px' }}>{info.typeName}</span>,
+  status: (v) => (v == 0 ? <span style={{ color: '#FF5F6D', fontSize: '12px' }}>失败</span> : <span style={{ color: '#00C9A7', fontSize: '12px' }}>成功</span>),
+  processAssetInfo: (assetNo, value, index, record) => {
+    if (record.status == 0) return <span style={{ fontSize: '12px' }}>-</span>;
+    if (value.typeId == 0) {
+      // 添加流动性
+      var assetAmount = assetNo == 0 ? value.inAssetInfo.amount : value.outAssetInfo.amount;
+      assetAmount += ' ' + (assetNo == 0 ? value.inAssetInfo.assetInfo.symbol : value.outAssetInfo.assetInfo.symbol).toUpperCase();
+      return <span style={{ fontSize: '12px' }}>{assetAmount}</span>;
+    }
+    if (value.typeId == 1) {
+      // 移除流动性
+      const actionOne = record.innerActions[0].action;
+      const actionTwo = record.innerActions[1].action;
+      const assetOneInfo = value.inAssetInfo.assetInfo;
+      const assetTwoInfo = value.outAssetInfo.assetInfo;
+      if (assetNo == 0) {
+        if (actionOne.assetID == assetOneInfo.assetid) {
+          return <span style={{ fontSize: '12px' }}>{new BigNumber(actionOne.value).shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase()}</span>;
+        }
+        return <span style={{ fontSize: '12px' }}>{new BigNumber(actionTwo.value).shiftedBy(assetOneInfo.decimals * -1).toString() + ' ' + assetOneInfo.symbol.toUpperCase()}</span>;
+      } else {
+        if (actionTwo.assetID == assetTwoInfo.assetid) {
+          return <span style={{ fontSize: '12px' }}>{new BigNumber(actionTwo.value).shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase()}</span>;
+        }
+        return <span style={{ fontSize: '12px' }}>{new BigNumber(actionOne.value).shiftedBy(assetTwoInfo.decimals * -1).toString() + ' ' + assetTwoInfo.symbol.toUpperCase()}</span>;
+      }
+    }
+    if (value.typeId == 2) {
+      // 兑换
+      const actionOne = record.innerActions[0].action;
+      const actionTwo = record.innerActions[1].action;
+      var action = actionOne.value > 0 ? actionOne : actionTwo;
+      if (assetNo == 0) {
+        return <span style={{ fontSize: '12px' }}>{value.inAssetInfo.amount + ' ' + value.inAssetInfo.assetInfo.symbol.toUpperCase()}</span>;
+      } else {
+        return (
+          <span style={{ fontSize: '12px' }}>
+            {new BigNumber(action.value).shiftedBy(value.outAssetInfo.assetInfo.decimals * -1).toString() + ' ' + value.outAssetInfo.assetInfo.symbol.toUpperCase()}
+          </span>
+        );
+      }
+    }
+    if (value.typeId == 3) {
+      // 提取挖矿
+    }
   },
 };

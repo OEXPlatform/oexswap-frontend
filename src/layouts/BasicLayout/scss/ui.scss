@@ -69,7 +69,7 @@
       }
 
       .ui-dialog-data {
-        height: 510px;
+        height: 520px;
         background-color: #fff;
         overflow: auto;
         &::-webkit-scrollbar {
@@ -88,41 +88,39 @@
         }
       }
 
-      .ui-footer-padding {
+      // 弹窗按钮
+      .ui-dialog-btns {
         box-shadow: 0px -3px 6px rgba(0, 0, 0, 0.16);
         border-radius: 0px 0px 20px 20px;
-        height: 40px;
+        height: 94px;
         position: relative;
         z-index: 3;
+        text-align: center;
+        padding-top: 30px;
+        .ui-submit,
+        .ui-cancel {
+          width: 120px;
+          height: 40px;
+          line-height: 40px;
+          text-align: center;
+          border-radius: 50px;
+          font-size: 16px;
+          display: inline-block;
+          cursor: pointer;
+          font-weight: 500;
+        }
+        .ui-submit {
+          background-color: #00c9a7;
+          color: #fff;
+          box-shadow: 0 1px 6px 1px rgba(#aaa, 0.8);
+        }
+        .ui-cancel {
+          margin-left: 40px;
+          color: #999;
+          background-color: #fff;
+          box-shadow: 0 1px 6px 1px rgba(#aaa, 0.8);
+        }
       }
-    }
-  }
-
-  // 弹窗按钮
-  .ui-dialog-btns {
-    text-align: center;
-    padding-top: 30px;
-    .ui-submit,
-    .ui-cancel {
-      width: 120px;
-      height: 40px;
-      line-height: 40px;
-      text-align: center;
-      border-radius: 50px;
-      font-size: 16px;
-      display: inline-block;
-      cursor: pointer;
-    }
-    .ui-submit {
-      background-color: #00c9a7;
-      color: #fff;
-      box-shadow: 0 0 3px 0 rgba(#00c9a7, 0.5);
-    }
-    .ui-cancel {
-      margin-left: 20px;
-      color: #999;
-      background-color: #fff;
-      box-shadow: 0 0 3px 0 rgba(#ccc, 0.5);
     }
   }
 }
@@ -132,7 +130,7 @@
   width: 810px;
   .ui-dialog-body {
     width: 810px;
-    height: 615px;
+    height: 682px;
     .ui-dialog-header {
       box-shadow: 0px -3px 6px rgba(0, 0, 0, 1);
     }
@@ -229,14 +227,17 @@
   }
 }
 
-.ui-pairList {
+.ui-pairList,
+.ui-txInfoList {
   width: 1088px;
   .ui-dialog-body {
     width: 1088px;
-    height: 615px;
+    height: 682px;
     .ui-dialog-data {
       padding-top: 0px !important;
+      padding-bottom: 0px !important;
       position: relative;
+      margin-bottom: 0 !important;
       .ui-pairList-tr {
         height: 33px;
         width: 100%;
@@ -247,7 +248,25 @@
         background-color: #f2f3f4;
       }
       .next-table {
+        // 隐藏其滚动条
+        .next-table-body {
+          &::-webkit-scrollbar {
+            height: 0;
+            width: 0;
+            background: transparent;
+          }
+          &::-webkit-scrollbar-thumb {
+            width: 0;
+            min-height: 15px;
+            background: transparent;
+          }
+          &::-webkit-scrollbar-thumb:active,
+          &::-webkit-scrollbar-thumb:hover {
+            background: transparent;
+          }
+        }
         .next-table-header {
+          padding-right: 0 !important;
           tr {
             th {
               border-bottom: none;
