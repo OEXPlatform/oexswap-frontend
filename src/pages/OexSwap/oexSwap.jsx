@@ -1298,7 +1298,7 @@ const txInfoColume = {
     </div>
   ),
   txHash: (value) => (
-    <a style={{ color: '#23C9A7', fontSize: '12px' }} className="blockNumber" href={'https://oexchain.com/#/Transaction?' + value}>
+    <a style={{ color: '#23C9A7', fontSize: '12px' }} target="_blank" className="blockNumber" href={'https://oexchain.com/#/Transaction?' + value}>
       {value.substr(0, 8) + '...' + value.substr(value.length - 6)}
     </a>
   ),
