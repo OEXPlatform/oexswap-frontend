@@ -264,3 +264,19 @@
     }
   }
 }
+
+.ui-color-primary {
+  color: #00c9a7;
+}
+
+.ui-button.next-btn {
+  border-radius: 4px;
+  height: 25px;
+  line-height: 25px;
+  &.next-btn-primary {
+    background-color: #00c9a7;
+  }
+  span {
+    vertical-align: unset;
+  }
+}

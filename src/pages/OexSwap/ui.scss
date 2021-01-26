@@ -99,12 +99,11 @@
   font-size: 12px;
   padding-left: 28px;
   padding-right: 28px;
-  line-height: 30px;
+  line-height: 28px;
   width: 100%;
   overflow: hidden;
   display: block;
   .ui-swap-tolerance-select {
-    margin-right: 10px;
     border-radius: 100px;
     border-color: #00c9a7 !important;
     color: #00c9a7;
@@ -115,7 +114,7 @@
     line-height: 24px !important;
     font-size: 12px;
     float: right;
-    margin-top: 3px;
+    margin-top: 1px;
     // font-weight: bold;
     i {
       color: #00c9a7 !important;
@@ -125,7 +124,8 @@
     }
   }
   .ui-inputTolerance {
-    margin-top: 3px;
+    margin-left: 10px;
+    margin-top: 1px;
     float: right;
     border: 1px solid #ccc;
     width: 60px;
@@ -175,7 +175,8 @@
     cursor: pointer;
     letter-spacing: 2px;
     text-indent: 2px;
-    transition: all ease 0.4s;
+    transition: color ease 0.4s;
+    transform: translateX(0);
     &:after {
       content: ' ';
       height: 4px;

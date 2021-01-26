@@ -815,11 +815,18 @@ export default class OexSwap extends Component {
     const assetTwoId = pairInfo.secondAssetId;
     const assetOneInfo = this.state.assetInfoMap[assetOneId];
     const assetTwoInfo = this.state.assetInfoMap[assetTwoId];
-    if (assetOneInfo != null && assetTwoInfo != null) {
-      return assetOneInfo.symbol.toUpperCase() + '[id:' + assetOneId + ']  -  ' + assetTwoInfo.symbol.toUpperCase() + '[id:' + assetTwoId + ']';
-    } else {
-      return '[id:' + assetOneId + ']  -  ' + '[id:' + assetTwoId + ']';
-    }
+    const assetOneSymbol = assetOneInfo ? assetOneInfo.symbol.toUpperCase() : '';
+    const assetTwoSymbol = assetTwoInfo ? assetTwoInfo.symbol.toUpperCase() : '';
+    return (
+      <div>
+        <div className="ui-color-primary" title={assetTwoInfo && assetTwoInfo.assetName}>
+          {assetOneSymbol} [ID: {assetOneId}]
+        </div>
+        <div title={assetTwoInfo && assetTwoInfo.assetName}>
+          {assetTwoSymbol} [ID: {assetTwoId}]
+        </div>
+      </div>
+    );
   };
 
   displayCurLiquid = (value, index, pairInfo) => {
@@ -827,19 +834,17 @@ export default class OexSwap extends Component {
     const assetTwoInfo = this.state.assetInfoMap[pairInfo.secondAssetId];
     const assetOneLiquid = pairInfo.firstAssetNumber;
     const assetTwoLiquid = pairInfo.secondAssetNumber;
-    if (assetOneInfo != null && assetTwoInfo != null) {
-      return (
-        assetOneLiquid.shiftedBy(assetOneInfo.decimals * -1).toString() +
-        ' ' +
-        assetOneInfo.symbol.toUpperCase() +
-        ' + ' +
-        assetTwoLiquid.shiftedBy(assetTwoInfo.decimals * -1).toString() +
-        ' ' +
-        assetTwoInfo.symbol.toUpperCase()
-      );
-    } else {
-      return assetOneLiquid.toString() + ' + ' + assetTwoLiquid.toString() + '(注意此数值皆为资产对应的最小单位)';
-    }
+    if (!assetOneInfo || !assetTwoInfo) return '';
+    return (
+      <div>
+        <div className="ui-color-primary">
+          {assetOneLiquid.shiftedBy(assetOneInfo.decimals * -1).toString()} {assetOneInfo.symbol.toUpperCase()}
+        </div>
+        <div>
+          {assetTwoLiquid.shiftedBy(assetTwoInfo.decimals * -1).toString()} {assetTwoInfo.symbol.toUpperCase()}
+        </div>
+      </div>
+    );
   };
 
   displayTotalLiquid = (value, index, pairInfo) => {
@@ -847,24 +852,22 @@ export default class OexSwap extends Component {
     const assetTwoInfo = this.state.assetInfoMap[pairInfo.secondAssetId];
     const assetOneLiquid = pairInfo.totalLiquidOfFirstAsset;
     const assetTwoLiquid = pairInfo.totalLiquidOfSecondAsset;
-    if (assetOneInfo != null && assetTwoInfo != null) {
-      return (
-        assetOneLiquid.shiftedBy(assetOneInfo.decimals * -1).toString() +
-        ' ' +
-        assetOneInfo.symbol.toUpperCase() +
-        ' + ' +
-        assetTwoLiquid.shiftedBy(assetTwoInfo.decimals * -1).toString() +
-        ' ' +
-        assetTwoInfo.symbol.toUpperCase()
-      );
-    } else {
-      return assetOneLiquid.toString() + ' + ' + assetTwoLiquid.toString() + '(注意此数值皆为资产对应的最小单位)';
-    }
+    if (!assetOneInfo || !assetTwoInfo) return '';
+    return (
+      <div>
+        <div className="ui-color-primary">
+          {assetOneLiquid.shiftedBy(assetOneInfo.decimals * -1).toString()} {assetOneInfo.symbol.toUpperCase()}
+        </div>
+        <div>
+          {assetTwoLiquid.shiftedBy(assetTwoInfo.decimals * -1).toString()} {assetTwoInfo.symbol.toUpperCase()}
+        </div>
+      </div>
+    );
   };
 
   startEX = (value, index, pairInfo) => {
     return (
-      <Button type="primary" onClick={() => this.startExchange(pairInfo)}>
+      <Button className="ui-button" type="primary" onClick={() => this.startExchange(pairInfo)}>
         开始交易
       </Button>
     );
@@ -937,7 +940,7 @@ export default class OexSwap extends Component {
                   兑换
                 </div>
                 <div className={cx({ 'ui-select': this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(true)}>
-                  流动性
+                  资金池
                 </div>
               </div>
               <div className="ui-card2">
@@ -946,7 +949,7 @@ export default class OexSwap extends Component {
                     <font>余额：</font>
                     <font>{this.state.fromInfo.maxValue}</font>
                   </div>
-                  <font>支付</font>
+                  <font>资产ID：{this.state.fromInfo.selectAssetInfo && this.state.fromInfo.selectAssetInfo.assetid}</font>
                 </div>
                 <div>
                   <Input
@@ -970,7 +973,7 @@ export default class OexSwap extends Component {
                     <font>余额：</font>
                     <font>{this.state.toInfo.maxValue}</font>
                   </div>
-                  <font>获取</font>
+                  <font>资产ID：{this.state.toInfo.selectAssetInfo && this.state.toInfo.selectAssetInfo.assetid}</font>
                 </div>
                 <div>
                   <Input
@@ -988,12 +991,15 @@ export default class OexSwap extends Component {
               </div>
               <Row justify="start" align="center" className="ui-swap-info-row" style={{ marginTop: '22px' }}>
                 <font>可接受的最大滑点:</font>
-                <Input
-                  disabled={!this.state.toleranceInputEnable}
-                  value={this.state.inputTolerance}
-                  onChange={(v) => this.setState({ inputTolerance: v })}
-                  className="ui-inputTolerance"
-                  innerAfter="%"></Input>
+                {this.state.toleranceInputEnable && (
+                  <Input
+                    autoFocus
+                    disabled={!this.state.toleranceInputEnable}
+                    value={this.state.inputTolerance}
+                    onChange={(v) => this.setState({ inputTolerance: v })}
+                    className="ui-inputTolerance"
+                    innerAfter="%"></Input>
+                )}
                 <Select
                   popupClassName="ui-swap-tolerance-select-popup"
                   dataSource={toleranceData}
@@ -1003,12 +1009,12 @@ export default class OexSwap extends Component {
                 />
               </Row>
               <Row justify="start" align="center" className="ui-swap-info-row">
-                <font>兑换手续费 {this.state.feeRate / 10}%</font>
-                <div style={{ float: 'right' }}>0.3 OEX</div>
+                <font>兑换手续费:</font>
+                <div style={{ float: 'right' }}>{this.state.feeRate / 10} %</div>
               </Row>
               <Row justify="start" align="center" className="ui-swap-info-row">
                 <font>您的流动性占比:</font>
-                <div style={{ float: 'right' }}>{this.state.curPairInfo.myPercent}%</div>
+                <div style={{ float: 'right' }}>{this.state.curPairInfo.myPercent} %</div>
                 {this.state.curPairInfo.myPercent > 0 ? (
                   <Button type="primary" className="maxButton" style={{ marginLeft: '20px', width: '80px' }} onClick={() => this.startRemoveLiquidity()}>
                     取回流动性
@@ -1017,18 +1023,18 @@ export default class OexSwap extends Component {
                   ''
                 )}
               </Row>
-              {this.isPairNormal() > 0 ? (
-                <Row justify="start" align="center" style={{ marginTop: '10px', paddingLeft: '20px', width: '100%' }}>
+              {this.isPairNormal() > 0 && (
+                <Row justify="start" align="center" className="ui-swap-info-row">
                   <div>
-                    <font>当前交易对信息: {this.state.pairAssetInfo}</font>
+                    <font>流动池数量</font>
+                    <span>资金池详情&gt;</span>
                   </div>
+                  <div>{this.state.pairAssetInfo}</div>
                 </Row>
-              ) : (
-                ''
               )}
 
               <Button className="ui-swap-submit" type="primary" onClick={() => (this.state.bLiquidOp ? this.startAddLiquidity() : this.startSwapAsset())}>
-                <font size="3">{this.state.bLiquidOp ? '提供流动性' : '兑换'}</font>
+                <font size="3">{this.state.bLiquidOp ? '添加资金池' : '兑换'}</font>
               </Button>
             </div>
 
@@ -1060,7 +1066,7 @@ export default class OexSwap extends Component {
                   <Input
                     autoFocus
                     placeholder="通过资产ID/资产全名搜索资产"
-                    innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} style={{}} />}
+                    innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} />}
                     value={this.state.assetContent}
                     onChange={(v) => this.setState({ assetContent: v })}
                     onPressEnter={() => this.searchAsset()}
@@ -1176,28 +1182,34 @@ export default class OexSwap extends Component {
             onPressEnter={this.onTxConfirmOK.bind(this)}
           />
         </Dialog>
-        <Dialog
-          language={T('zh-cn')}
-          style={{ width: 800 }}
-          visible={this.state.myTxInfoVisible}
-          title={T('您的交易记录')}
-          footerActions="ok"
-          footerAlign="center"
-          closeable="true"
-          onOk={() => this.setState({ myTxInfoVisible: false })}
-          onCancel={() => this.setState({ myTxInfoVisible: false })}
-          onClose={() => this.setState({ myTxInfoVisible: false })}>
-          <IceContainer>
-            <Table dataSource={this.state.txInfoList} hasBorder={false} language={T('zh-cn')} resizable>
-              <Table.Column title={T('交易时间')} dataIndex="time" width={80} />
-              <Table.Column title={T('交易hash')} dataIndex="txHash" width={80} cell={this.renderHash.bind(this)} />
-              <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={100} cell={(actionInfo) => actionInfo.accountName} />
-              <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={80} cell={(actionInfo) => actionInfo.typeName} />
-              <Table.Column title={T('状态')} dataIndex="status" width={80} cell={(v) => (v == 0 ? '失败' : '成功')} />
-              <Table.Column title={T('资产1')} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 0)} />
-              <Table.Column title={T('资产2')} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 1)} />
-            </Table>
-          </IceContainer>
+
+        <Dialog className="ui-dialog" hasMask={false} footer={false} closeable={false} language={T('zh-cn')} visible={this.state.myTxInfoVisible}>
+          <div className="ui-pairList ui-dialog-content">
+            <div className="ui-dialog-body">
+              <div className="ui-dialog-header">
+                <div className="ui-dialog-title">{T('交易记录')}</div>
+              </div>
+              <IceContainer className="ui-dialog-data">
+                <Table dataSource={this.state.txInfoList} hasBorder={false} language={T('zh-cn')} resizable>
+                  <Table.Column title={T('交易时间')} dataIndex="time" width={80} />
+                  <Table.Column title={T('交易hash')} dataIndex="txHash" width={80} cell={this.renderHash.bind(this)} />
+                  <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={100} cell={(actionInfo) => actionInfo.accountName} />
+                  <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={80} cell={(actionInfo) => actionInfo.typeName} />
+                  <Table.Column title={T('状态')} dataIndex="status" width={80} cell={(v) => (v == 0 ? '失败' : '成功')} />
+                  <Table.Column title={T('资产1')} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 0)} />
+                  <Table.Column title={T('资产2')} dataIndex="actionInfo" width={80} cell={this.processAssetInfo.bind(this, 1)} />
+                </Table>
+              </IceContainer>
+            </div>
+            <div className="ui-dialog-btns">
+              <div className="ui-submit" onClick={() => this.setState({ myTxInfoVisible: false })}>
+                确定
+              </div>
+              <div className="ui-cancel" onClick={() => this.setState({ myTxInfoVisible: false })}>
+                取消
+              </div>
+            </div>
+          </div>
         </Dialog>
 
         <Dialog className="ui-dialog" hasMask={false} footer={false} closeable={false} language={T('zh-cn')} visible={this.state.pairListVisible}>
@@ -1209,10 +1221,10 @@ export default class OexSwap extends Component {
               <IceContainer className="ui-dialog-data">
                 <div className="ui-pairList-tr"></div>
                 <Table dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
-                  <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={80} cell={this.displayAssetInfo.bind(this)} />
-                  <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={100} cell={this.displayCurLiquid.bind(this)} />
-                  <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.displayTotalLiquid.bind(this)} />
-                  <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={80} cell={this.startEX.bind(this)} />
+                  <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={230} cell={this.displayAssetInfo.bind(this)} />
+                  <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={260} cell={this.displayCurLiquid.bind(this)} />
+                  <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={410} cell={this.displayTotalLiquid.bind(this)} />
+                  <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={120} cell={this.startEX.bind(this)} />
                 </Table>
               </IceContainer>
             </div>
@@ -1242,7 +1254,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    height: '510px',
+    height: '620px',
     width: '394px',
     backgroundColor: '#fff',
     borderRadius: '36px',
@@ -1255,7 +1267,7 @@ const styles = {
     justifyContent: 'space-between',
     width: '100%',
     color: 'white',
-    marginTop: '10px',
+    marginTop: '18px',
     padding: '0 10px',
     //flexDirection: 'row',
     //alignItems: 'center'
