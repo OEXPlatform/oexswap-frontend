@@ -196,3 +196,99 @@
     }
   }
 }
+
+.ui-pairInfo {
+  width: 342px;
+  height: 78px;
+  background: #00c9a7;
+  border: 3px solid #affcea;
+  border-radius: 10px;
+  margin-top: 14px;
+}
+.ui-my-pairInfo {
+  width: 340px;
+  height: 50px;
+  background: #f2f3f4;
+  border-radius: 10px;
+  line-height: 50px;
+  margin: 10px 0 0;
+  font-size: 16px;
+  color: #141426;
+  overflow: hidden;
+  div {
+    float: left;
+  }
+  div:nth-child(2) {
+    margin-left: 12px;
+    font-weight: 500;
+  }
+  div:nth-child(3) {
+    float: right;
+    margin-right: 20px;
+  }
+  div:nth-child(1) {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin: 14px 0 0 12px;
+    float: left;
+    &::before {
+      content: ' ';
+      width: 6px;
+      height: 14px;
+      background-color: #00c9a7;
+      display: block;
+      float: left;
+      margin-left: 2px;
+      margin-top: 2px;
+      border-radius: 1px;
+    }
+    &::after {
+      content: ' ';
+      width: 6px;
+      height: 14px;
+      background-color: #fc355f;
+      display: block;
+      float: right;
+      margin-right: 2px;
+      margin-top: 2px;
+      border-radius: 1px;
+    }
+  }
+}
+
+.ui-pairInfo-num {
+  padding-left: 6px;
+  width: 330px;
+  font-size: 12px;
+  overflow: hidden;
+  line-height: 24px;
+  color: #141426;
+  .ui-pairInfo-first {
+    float: left;
+    width: 150px;
+    text-align: right;
+  }
+  .ui-pairInfo-second {
+    float: left;
+    max-width: 150px;
+  }
+  .ui-paireInfo-join {
+    float: left;
+    padding: 0 8px;
+  }
+  .ui-pair-symbol {
+    float: right;
+    margin-left: 4px;
+    color: #00c9a7;
+  }
+}
+.ui-pairInfo {
+  .ui-pairInfo-num {
+    color: #fff;
+    .ui-pair-symbol {
+      color: #008e75;
+    }
+  }
+}

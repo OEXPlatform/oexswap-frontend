@@ -123,19 +123,29 @@ export default class OexSwap extends Component {
             pairInfo.index = i;
             _this.state.pairList.push(pairInfo);
             _this.state.pairMap[pairInfo.firstAssetId + '-' + pairInfo.secondAssetId] = pairInfo;
+            const awaitList = [];
             if (this.state.assetInfoMap[pairInfo.firstAssetId] == null) {
-              oexchain.account.getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
-                if (assetInfo != null) {
-                  this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
-                }
-              });
+              awaitList.push(
+                oexchain.account.getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
+                  if (assetInfo != null) {
+                    this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
+                  }
+                })
+              );
             }
             if (this.state.assetInfoMap[pairInfo.secondAssetId] == null) {
-              oexchain.account.getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
-                if (assetInfo != null) {
-                  this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
-                }
-              });
+              awaitList.push(
+                oexchain.account.getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
+                  if (assetInfo != null) {
+                    this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
+                  }
+                })
+              );
+            }
+
+            // 默认选一个
+            if (i === 0 && !this.state.fromInfo.selectAssetInfo && !this.state.toInfo.selectAssetInfo) {
+              Promise.all(awaitList).then(() => this.startExchange(pairInfo));
             }
           });
         }
@@ -460,12 +470,29 @@ export default class OexSwap extends Component {
 
         const firstAssetAmount = pairInfo.firstAssetNumber.shiftedBy(firstAssetInfo.decimals * -1).toFixed(6);
         const secondAssetAmount = pairInfo.secondAssetNumber.shiftedBy(secondAssetInfo.decimals * -1).toFixed(6);
-        this.state.pairAssetInfo = firstAssetAmount + ' ' + firstAssetInfo.symbol.toUpperCase() + ' + ' + secondAssetAmount + ' ' + secondAssetInfo.symbol.toUpperCase();
-        this.setState({ pairAssetInfo: this.state.pairAssetInfo });
+        this.setPairAssetInfo(firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo);
       }
       this.setState({ curPairInfo });
     }
   };
+
+  setPairAssetInfo(firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo) {
+    this.setState({
+      pairAssetInfo: (
+        <div className="ui-pairInfo-num">
+          <div className="ui-pairInfo-first ui-ell ui-clearfix" title={firstAssetAmount}>
+            <div className="ui-pair-symbol">{firstAssetInfo.symbol.toUpperCase()}</div>
+            {firstAssetAmount}
+          </div>
+          <div className="ui-paireInfo-join">/</div>
+          <div className="ui-pairInfo-second ui-ell ui-clearfix" title={secondAssetAmount}>
+            <div className="ui-pair-symbol">{secondAssetInfo.symbol.toUpperCase()}</div>
+            {secondAssetAmount}
+          </div>
+        </div>
+      ),
+    });
+  }
 
   updateBaseInfoByPairInfo = async (curPairInfo, fromInfo, toInfo) => {
     curPairInfo.exist = true;
@@ -483,8 +510,8 @@ export default class OexSwap extends Component {
 
     const firstAssetAmount = curPairInfo.firstAssetNumber.shiftedBy(firstAssetInfo.decimals * -1).toFixed(6);
     const secondAssetAmount = curPairInfo.secondAssetNumber.shiftedBy(secondAssetInfo.decimals * -1).toFixed(6);
-    this.state.pairAssetInfo = firstAssetAmount + ' ' + firstAssetInfo.symbol.toUpperCase() + ' + ' + secondAssetAmount + ' ' + secondAssetInfo.symbol.toUpperCase();
-    this.setState({ pairAssetInfo: this.state.pairAssetInfo, curPairInfo });
+    this.setPairAssetInfo(firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo);
+    this.setState({ curPairInfo });
   };
 
   getAssetDisplayInfo = (assetList) => {
@@ -1015,22 +1042,30 @@ export default class OexSwap extends Component {
               <Row justify="start" align="center" className="ui-swap-info-row">
                 <font>您的流动性占比:</font>
                 <div style={{ float: 'right' }}>{this.state.curPairInfo.myPercent} %</div>
-                {this.state.curPairInfo.myPercent > 0 ? (
+                {/* {this.state.curPairInfo.myPercent > 0 && (
                   <Button type="primary" className="maxButton" style={{ marginLeft: '20px', width: '80px' }} onClick={() => this.startRemoveLiquidity()}>
                     取回流动性
                   </Button>
-                ) : (
-                  ''
-                )}
+                )} */}
               </Row>
-              {this.isPairNormal() > 0 && (
+              {this.state.bLiquidOp ? (
                 <Row justify="start" align="center" className="ui-swap-info-row">
-                  <div>
-                    <font>流动池数量</font>
-                    <span>资金池详情&gt;</span>
-                  </div>
-                  <div>{this.state.pairAssetInfo}</div>
+                  <font>流动池数量</font>
+                  <span style={{ marginLeft: '10px', color: '#00C9A7' }}>资金池详情&gt;</span>
+                  {this.state.pairAssetInfo}
+                  {this.isPairNormal() > 0 && (
+                    <div className="ui-my-pairInfo">
+                      <div></div>
+                      <div>我的做市</div>
+                      <div>&gt;</div>
+                    </div>
+                  )}
                 </Row>
+              ) : (
+                <div className="ui-pairInfo">
+                  <div style={{ color: '#0C5453', fontSize: '12px', textAlign: 'center', margin: '10px 0' }}>当前资金池流动性总量</div>
+                  {this.state.pairAssetInfo}
+                </div>
               )}
 
               <Button className="ui-swap-submit" type="primary" onClick={() => (this.state.bLiquidOp ? this.startAddLiquidity() : this.startSwapAsset())}>
