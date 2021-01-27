@@ -14,7 +14,8 @@
   },
   "modeConfig": {
     "deploy": {
-      "outputDir": "dist"
+      "outputDir": "dist",
+      "hash": "contenthash"
     }
   },
   "disableRuntime": true
