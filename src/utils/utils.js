@@ -6,6 +6,7 @@ import EthCrypto from 'eth-crypto';
 import {AbiCoder as EthersAbiCoder} from 'ethers/utils/abi-coder';
 import * as oexchain from 'oex-web3';
 import * as ethUtil from 'ethereumjs-util';
+import { decode } from 'rlp';
 import { T } from './lang';
 import * as Constant from './constant';
 /**

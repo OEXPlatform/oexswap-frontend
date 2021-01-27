@@ -8,6 +8,8 @@ import cookie from 'react-cookies';
 import BigNumber from 'bignumber.js';
 import cx from 'classnames';
 
+import * as abiUtil from 'ethereumjs-abi';
+
 import * as utils from '../../utils/utils';
 import * as Notification from '../../utils/notification';
 import { T } from '../../utils/lang';
