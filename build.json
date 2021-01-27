@@ -9,5 +9,13 @@
     ],
     "./build.plugin.js"
   ],
+  "devServer": {
+    "historyApiFallback": true
+  },
+  "modeConfig": {
+    "deploy": {
+      "outputDir": "dist"
+    }
+  },
   "disableRuntime": true
 }

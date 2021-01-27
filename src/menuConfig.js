@@ -11,7 +11,7 @@ const headerMenuConfig = [
   }
 ];
 
-const asideMenuConfig = [ 
+const asideMenuConfig = [
 ];
 
 export { headerMenuConfig, asideMenuConfig };

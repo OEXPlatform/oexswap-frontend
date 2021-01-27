@@ -64,23 +64,27 @@
     "solc": "^0.5.6"
   },
   "devDependencies": {
+    "aes-cross": "^1.0.9",
+    "ali-oss": "^6.13.2",
     "babel-eslint": "^8.0.3",
     "babel-plugin-react-v-html": "^1.0.4",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "build-plugin-fusion": "^0.1.0",
     "eslint": "^4.13.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-babel": "^4.1.1",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
-    "moment": "^2.22.2",
     "ice.js": "^1.0.0",
-    "build-plugin-fusion": "^0.1.0"
+    "moment": "^2.22.2"
   },
   "scripts": {
     "start": "icejs start --port 9090",
     "build": "icejs build",
-    "lint": "eslint . --ext '.js,.jsx' --fix"
+    "lint": "eslint . --ext '.js,.jsx' --fix",
+    "deploy": "icejs build --mode deploy && node deploy",
+    "p": "node deploy"
   },
   "publishConfig": {
     "registry": "http://registry.npmjs.com",

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
-import { createHashHistory } from 'history';
+import { createBrowserHistory } from 'history';
 import axios from 'axios';
 import { Feedback } from '@icedesign/base';
 import * as oexchain from 'oex-web3';
@@ -23,10 +23,9 @@ if (defaultLang != null) {
 
 // Create redux store with history
 const initialState = {};
-const history = createHashHistory();
+const history = createBrowserHistory();
 const store = configureStore(initialState, history);
 const ICE_CONTAINER = document.getElementById('ice-container');
-
 
 //oexchain.utils.setProvider("http://8.210.200.219:8080");
 // let nodeInfo = cookie.load('nodeInfo');
