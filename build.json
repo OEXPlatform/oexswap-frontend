@@ -9,13 +9,13 @@
     ],
     "./build.plugin.js"
   ],
+  "hash": true,
   "devServer": {
     "historyApiFallback": true
   },
   "modeConfig": {
     "deploy": {
-      "outputDir": "dist",
-      "hash": "contenthash"
+      "outputDir": "dist"
     }
   },
   "disableRuntime": true
