@@ -618,6 +618,21 @@ function doSave(value, type, name) {
   }
 }
 
+function parseAddLiqPayloadInfo(payload) {
+  payload = payload.substr(0, payload.length - 8);
+  const decodedInfo = decode(payload);
+  const firstAssetId = new BigNumber(bufferToHex(decodedInfo[0][0][0]));
+  const firstAssetNumber = new BigNumber(bufferToHex(decodedInfo[0][0][1]));
+  const secondAssetId = new BigNumber(bufferToHex(decodedInfo[0][1][0]));
+  const secondAssetNumber = new BigNumber(bufferToHex(decodedInfo[0][1][1]));
+  return {firstAssetId, firstAssetNumber, secondAssetId, secondAssetNumber};
+}
+
+function bufferToHex(buffer) {
+  if (buffer.length == 0) return '0x00';
+  return '0x' + [...buffer].map (b => b.toString (16).padStart (2, "0")).join ("");
+}
+
 function trace (count) {
   // var caller = trace.caller;
   // var i = 0;
@@ -637,4 +652,4 @@ export { getFlatMenuData, getRouterData, formatterMenuData, hex2Bytes, bytes2Hex
          removeDataFromFile, loadKeystoreFromLS, loadAccountsFromLS, getReadableNumber, confuseInfo, 
          getGasEarned, getValidTime, checkIpVaild, getDuration, guid, getRandomInt, getSpanTime,
          getValidKeystores, storeContractABI, getContractABI, parseResult, checkPrefix, isEqualAddress, checkURC20,
-         trace, doSave };
+         trace, doSave, parseAddLiqPayloadInfo };
