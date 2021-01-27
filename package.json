@@ -83,8 +83,7 @@
     "start": "icejs start --port 9090",
     "build": "icejs build",
     "lint": "eslint . --ext '.js,.jsx' --fix",
-    "deploy": "icejs build --mode deploy && node deploy",
-    "p": "node deploy"
+    "deploy": "icejs build --mode deploy && node deploy"
   },
   "publishConfig": {
     "registry": "http://registry.npmjs.com",
