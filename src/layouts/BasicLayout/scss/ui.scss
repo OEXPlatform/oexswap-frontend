@@ -12,12 +12,18 @@
   overflow: hidden;
 }
 svg path {
-  fill: inherit !important;
+  fill: inherit;
+}
+svg path:nth-child(1) {
+  fill: currentColor;
+}
+.icon-path-2-gray path:nth-child(2) {
+  fill: #f2f3f4;
 }
 
 // 页内弹窗
 .ui-dialog {
-  position: absolute !important;
+  position: fixed !important;
   top: 60px !important;
   left: 0 !important;
   right: 0 !important;
@@ -46,15 +52,20 @@ svg path {
         height: 66px;
         overflow: hidden;
         line-height: 80px;
-        padding-left: 30px;
+        padding-left: 28px;
         position: relative;
         // border-bottom: 1px solid #c9cace;
         z-index: 3;
+
         .ui-dialog-title {
-          padding-left: 20px;
           color: #000;
-          font-size: 18px;
+          font-size: 16px;
           text-shadow: 0 0 0 #000;
+          > .iconfont {
+            font-size: 24px;
+            margin-right: 20px;
+            vertical-align: -0.25em;
+          }
         }
         .ui-dialog-search {
           width: 380px;
@@ -75,6 +86,9 @@ svg path {
             input::placeholder,
             textarea::placeholder {
               color: #00c9a7;
+            }
+            .next-icon {
+              margin-top: 6px;
             }
           }
         }

@@ -17,13 +17,14 @@ import * as Constant from '../../utils/constant';
 import './style.scss';
 import './ui.scss';
 import { UiDialog } from '../../components/UiDialog';
+import { Iconfont } from '../../components/iconfont';
 
 const { Row, Col } = Grid;
 // const oexLogo =
 const oexToken = require('./images/oexToken.png');
 const PNG_max = require('./images/max.png');
 const PNG_transfer = require('./images/transfer.png');
-const otherToken = require('./images/otherToken.png');
+const otherToken = require('./images/default-logo.png');
 
 const toleranceData = [
   { label: '0.1%', value: 1 },
@@ -766,10 +767,11 @@ export default class OexSwap extends Component {
   };
 
   showMiningInfo = () => {
-    this.getMiningOEXPerBlock();
-    this.getMyHavestOEX();
-    this.getMiningSettings();
-    this.setState({ miningVisible: true });
+    Notification.displayNotice('敬请期待');
+    // this.getMiningOEXPerBlock();
+    // this.getMyHavestOEX();
+    // this.getMiningSettings();
+    // this.setState({ miningVisible: true });
   };
 
   startHarvest = () => {
@@ -1045,36 +1047,29 @@ export default class OexSwap extends Component {
 
           </Card> */}
         </Row>
-        <Dialog className="ui-dialog" hasMask={false} visible={this.state.assetSelectorDialogVisible} footer={false} closeable={false}>
-          <div className="ui-SelectAsset ui-dialog-content">
-            <div className="ui-dialog-body">
-              <div className="ui-dialog-header">
-                <div className="ui-dialog-title">选择资产</div>
-                <div className="ui-dialog-search">
-                  <Input
-                    autoFocus
-                    placeholder="通过资产ID/资产全名搜索资产"
-                    innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} />}
-                    value={this.state.assetContent}
-                    onChange={(v) => this.setState({ assetContent: v })}
-                    onPressEnter={() => this.searchAsset()}
-                  />
-                </div>
-              </div>
-              <Row wrap justify="start" className="ui-dialog-data">
-                {this.state.assetDisplayList.map((assetInfo) => assetInfo)}
-              </Row>
-              <div className="ui-dialog-btns">
-                <div className="ui-submit" onClick={this.onSelectAssetOK.bind(this)}>
-                  确定
-                </div>
-                <div className="ui-cancel" onClick={() => this.setState({ assetSelectorDialogVisible: false })}>
-                  取消
-                </div>
-              </div>
+        <UiDialog
+          className="ui-SelectAsset"
+          visible={this.state.assetSelectorDialogVisible}
+          title={[<Iconfont icon="asset" primary></Iconfont>, T('选择资产')]}
+          header={
+            <div className="ui-dialog-search">
+              <Input
+                autoFocus
+                placeholder="通过资产ID/资产全名搜索资产"
+                innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} />}
+                value={this.state.assetContent}
+                onChange={(v) => this.setState({ assetContent: v })}
+                onPressEnter={() => this.searchAsset()}
+              />
             </div>
-          </div>
-        </Dialog>
+          }
+          onOk={this.onSelectAssetOK.bind(this)}
+          onCancel={() => this.setState({ assetSelectorDialogVisible: false })}>
+          <Row wrap justify="start" className="ui-dialog-data">
+            {this.state.assetDisplayList.map((assetInfo) => assetInfo)}
+          </Row>
+        </UiDialog>
+
         <Dialog
           style={{ width: '600px', padding: 0 }}
           visible={this.state.userRemovedLiquidVisible}
@@ -1094,6 +1089,7 @@ export default class OexSwap extends Component {
             onPressEnter={() => this.onInputRemovedLiquidOK()}
           />
         </Dialog>
+
         <Dialog
           style={{ width: '600px', padding: 0, color: 'white' }}
           visible={this.state.miningVisible}
@@ -1173,7 +1169,7 @@ export default class OexSwap extends Component {
         <UiDialog
           className="ui-pairList"
           visible={this.state.myTxInfoVisible}
-          title={T('交易记录')}
+          title={[<Iconfont icon="history" primary></Iconfont>, T('交易记录')]}
           onOk={() => this.setState({ myTxInfoVisible: false })}
           onCancel={() => this.setState({ myTxInfoVisible: false })}>
           <IceContainer className="ui-dialog-data">
@@ -1193,8 +1189,7 @@ export default class OexSwap extends Component {
         <UiDialog
           className="ui-pairList"
           visible={this.state.pairListVisible}
-          title={T('所有交易对')}
-          titleIcon={<i class="iconfont icon-oex"></i>}
+          title={[<Iconfont icon="swap" primary></Iconfont>, T('所有交易对')]}
           onOk={() => this.setState({ pairListVisible: false })}
           onCancel={() => this.setState({ pairListVisible: false })}>
           <IceContainer className="ui-dialog-data">
@@ -1318,8 +1313,8 @@ const txInfoColume = {
     if (value.typeId == 2) {
       // 兑换
       const actionOne = record.innerActions[0].action;
-      const actionTwo = record.innerActions[1].action;
-      var action = actionOne.value > 0 ? actionOne : actionTwo;
+      // const actionTwo = record.innerActions[1].action;
+      var action = actionOne.value > 0 ? actionOne : record.innerActions[1].action;
       if (assetNo == 0) {
         return <span style={{ fontSize: '12px' }}>{value.inAssetInfo.amount + ' ' + value.inAssetInfo.assetInfo.symbol.toUpperCase()}</span>;
       } else {

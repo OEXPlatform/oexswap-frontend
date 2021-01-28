@@ -17,8 +17,8 @@ export default class Footer extends PureComponent {
       <Layout.Footer className={cx('ui-layout-footer', className)} style={style}>
         <div className="ui-layout-footer-body">
           <div className="ui-footer">
-            <a href="/">
-              <img src={PNG_logo} />
+            <a href="/" style={{ fontSize: '16px', color: '#5E768B', fontWeight: 'bold' }}>
+              OEX Swap
             </a>
             <a style={{ right: 56 * 3 + 'px' }} href="http://t.me/oexfund">
               <img src={PNG_tzh} />
