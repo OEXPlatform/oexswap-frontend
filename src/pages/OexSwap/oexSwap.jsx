@@ -1201,7 +1201,10 @@ export default class OexSwap extends Component {
           <div className="ui-pairList ui-dialog-content">
             <div className="ui-dialog-body">
               <div className="ui-dialog-header">
-                <div className="ui-dialog-title">{T('所有交易对')}</div>
+                <div className="ui-dialog-title">
+                  <i class="iconfont icon-oex"></i>
+                  {T('所有交易对')}
+                </div>
               </div>
               <IceContainer className="ui-dialog-data">
                 <div className="ui-pairList-tr"></div>

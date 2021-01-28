@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const OSS = require('ali-oss');
 const aes = require('aes-cross');
+const SDK = require('ali-cdn-sdk');
 
 const uploadList = []; // 文件上传列表
 
@@ -105,4 +106,18 @@ async function doUpload() {
       });
     })
   );
+
+  // 特殊文件有上传变更。需要刷新cdn缓存
+  if (lastUpload.length > 0) {
+    const sdk = new SDK({
+      accessKeyId: AliOss.accessKeyId,
+      appSecret: AliOss.accessKeySecret,
+      endpoint: 'https://cdn.aliyuncs.com',
+      apiVersion: '2018-05-10',
+    });
+    const res = await sdk.RefreshObjectCaches({
+      ObjectPath: 'swap.fmex.fun/',
+    });
+    console.log(res);
+  }
 }

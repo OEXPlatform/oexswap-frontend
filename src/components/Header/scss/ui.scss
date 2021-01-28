@@ -19,19 +19,20 @@
     overflow: hidden;
     width: 150px;
     float: left;
-    a {
+    .logo-text {
       color: #23c9a7 !important;
       font-size: 16px;
       font-weight: bold;
       padding-left: 20px;
       float: left;
     }
-    img {
+    svg {
       width: 36px;
       height: 36px;
       display: block;
       float: left;
       margin: 12px 0;
+      cursor: pointer;
     }
   }
 }
