@@ -16,6 +16,7 @@ import { T } from '../../utils/lang';
 import * as Constant from '../../utils/constant';
 import './style.scss';
 import './ui.scss';
+import { UiDialog } from '../../components/UiDialog';
 
 const { Row, Col } = Grid;
 // const oexLogo =
@@ -1169,65 +1170,43 @@ export default class OexSwap extends Component {
           />
         </Dialog>
 
-        <Dialog className="ui-dialog" hasMask={false} footer={false} closeable={false} language={T('zh-cn')} visible={this.state.myTxInfoVisible}>
-          <div className="ui-txInfoList ui-dialog-content">
-            <div className="ui-dialog-body">
-              <div className="ui-dialog-header">
-                <div className="ui-dialog-title">{T('交易记录')}</div>
-              </div>
-              <IceContainer className="ui-dialog-data">
-                <div className="ui-pairList-tr"></div>
-                <Table dataSource={this.state.txInfoList} hasBorder={false} language={T('zh-cn')} resizable>
-                  <Table.Column title={T('交易时间')} dataIndex="time" width={144} cell={txInfoColume.time} />
-                  <Table.Column title={T('交易哈希值')} dataIndex="txHash" width={200} cell={txInfoColume.txHash} />
-                  <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={140} cell={txInfoColume.accountName} />
-                  <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={140} cell={txInfoColume.typeName} />
-                  <Table.Column title={T('状态')} dataIndex="status" width={110} cell={txInfoColume.status} />
-                  <Table.Column title={T('资产1')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 0)} />
-                  <Table.Column title={T('资产2')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 1)} />
-                </Table>
-              </IceContainer>
-              <div className="ui-dialog-btns">
-                <div className="ui-submit" onClick={() => this.setState({ myTxInfoVisible: false })}>
-                  确定
-                </div>
-                <div className="ui-cancel" onClick={() => this.setState({ myTxInfoVisible: false })}>
-                  取消
-                </div>
-              </div>
-            </div>
-          </div>
-        </Dialog>
+        <UiDialog
+          className="ui-pairList"
+          visible={this.state.myTxInfoVisible}
+          title={T('交易记录')}
+          onOk={() => this.setState({ myTxInfoVisible: false })}
+          onCancel={() => this.setState({ myTxInfoVisible: false })}>
+          <IceContainer className="ui-dialog-data">
+            <div className="ui-pairList-tr"></div>
+            <Table dataSource={this.state.txInfoList} hasBorder={false} language={T('zh-cn')} resizable>
+              <Table.Column title={T('交易时间')} dataIndex="time" width={144} cell={txInfoColume.time} />
+              <Table.Column title={T('交易哈希值')} dataIndex="txHash" width={200} cell={txInfoColume.txHash} />
+              <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={140} cell={txInfoColume.accountName} />
+              <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={140} cell={txInfoColume.typeName} />
+              <Table.Column title={T('状态')} dataIndex="status" width={110} cell={txInfoColume.status} />
+              <Table.Column title={T('资产1')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 0)} />
+              <Table.Column title={T('资产2')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 1)} />
+            </Table>
+          </IceContainer>
+        </UiDialog>
 
-        <Dialog className="ui-dialog" hasMask={false} footer={false} closeable={false} language={T('zh-cn')} visible={this.state.pairListVisible}>
-          <div className="ui-pairList ui-dialog-content">
-            <div className="ui-dialog-body">
-              <div className="ui-dialog-header">
-                <div className="ui-dialog-title">
-                  <i class="iconfont icon-oex"></i>
-                  {T('所有交易对')}
-                </div>
-              </div>
-              <IceContainer className="ui-dialog-data">
-                <div className="ui-pairList-tr"></div>
-                <Table fixedHeader={true} maxBodyHeight="484px" dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
-                  <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={230} cell={this.displayAssetInfo.bind(this)} />
-                  <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={260} cell={this.displayCurLiquid.bind(this)} />
-                  <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={410} cell={this.displayTotalLiquid.bind(this)} />
-                  <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={120} cell={this.startEX.bind(this)} />
-                </Table>
-              </IceContainer>
-              <div className="ui-dialog-btns">
-                <div className="ui-submit" onClick={() => this.setState({ pairListVisible: false })}>
-                  确定
-                </div>
-                <div className="ui-cancel" onClick={() => this.setState({ pairListVisible: false })}>
-                  取消
-                </div>
-              </div>
-            </div>
-          </div>
-        </Dialog>
+        <UiDialog
+          className="ui-pairList"
+          visible={this.state.pairListVisible}
+          title={T('所有交易对')}
+          titleIcon={<i class="iconfont icon-oex"></i>}
+          onOk={() => this.setState({ pairListVisible: false })}
+          onCancel={() => this.setState({ pairListVisible: false })}>
+          <IceContainer className="ui-dialog-data">
+            <div className="ui-pairList-tr"></div>
+            <Table fixedHeader={true} maxBodyHeight="484px" dataSource={this.state.pairList} hasBorder={false} language={T('zh-cn')} resizable>
+              <Table.Column title={T('交易对')} dataIndex="firstAssetId" width={230} cell={this.displayAssetInfo.bind(this)} />
+              <Table.Column title={T('当前流通量')} dataIndex="firstAssetNumber" width={260} cell={this.displayCurLiquid.bind(this)} />
+              <Table.Column title={T('总交易量')} dataIndex="totalLiquidOfFirstAsset" width={410} cell={this.displayTotalLiquid.bind(this)} />
+              <Table.Column title={T('操作')} dataIndex="totalLiquidOfFirstAsset" width={120} cell={this.startEX.bind(this)} />
+            </Table>
+          </IceContainer>
+        </UiDialog>
       </div>
     );
   }

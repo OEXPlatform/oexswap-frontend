@@ -24,6 +24,8 @@ import { T, setLang } from '../../utils/lang';
 import eventProxy from '../../utils/eventProxy';
 import BigNumber from 'bignumber.js';
 import './scss/ui.scss';
+import { Iconfont } from '../iconfont';
+import { UiDialog } from '../UiDialog';
 
 // import { BigNumber } from 'ethers/utils';
 const { Row } = Grid;
@@ -272,14 +274,14 @@ export default class Header extends PureComponent {
 
   render() {
     const defaultTrigger = (
-      <Button text type="normal" style={{ color: '#808080' }} onClick={this.openSetDialog.bind(this)}>
-        <Icon type="set" />
+      <Button text type="normal" style={{ color: '#808080', marginRight: '100px' }} onClick={this.openSetDialog.bind(this)}>
+        <Iconfont style={{ marginRight: '8px', fontSize: '16px' }} icon="node" primary />
         {T('设置接入节点')}
       </Button>
     );
     const accountBtnTrigger = (
-      <Button text type="normal" style={{ color: '#808080', marginLeft: '30px' }} onClick={this.manageAccount.bind(this)}>
-        <Icon type="account" />
+      <Button text type="normal" style={{ color: '#808080', marginRight: '30px' }} onClick={this.manageAccount.bind(this)}>
+        <Iconfont icon="account" style={{ marginRight: '8px', fontSize: '16px' }} primary></Iconfont>
         {T('账号设置')}
       </Button>
     );
@@ -334,48 +336,46 @@ export default class Header extends PureComponent {
           <Balloon trigger={defaultTrigger} closable={false} style={{ color: '#5e768b' }}>
             {T('当前连接的节点')}:{this.state.nodeInfo}, ChainId:{this.state.chainId}
           </Balloon>
-          &nbsp;&nbsp;
           <Balloon trigger={accountBtnTrigger} closable={false} style={{ color: '#5e768b' }}>
             {T('当前账号')}:{this.state.accountName == '' ? '尚未导入' : this.state.accountName}
           </Balloon>
-          &nbsp;&nbsp;
           {/* <Button text type="normal" style={{color: '#808080', marginLeft: '30px'}} onClick={this.onChangeLanguage.bind(this)}>{this.state.curLang}</Button> */}
-          <Button text type="normal" style={{ color: '#00C9A7', marginLeft: '30px', marginRight: '50px' }} onClick={() => this.setState({ spreadInfoDialogVisible: true })}>
+          <Button text type="normal" style={{ color: '#00C9A7', marginRight: '50px' }} onClick={() => this.setState({ spreadInfoDialogVisible: true })}>
+            <Iconfont icon="gift" style={{ marginRight: '8px', fontSize: '16px' }} primary></Iconfont>
             邀请奖励
           </Button>
-          <Dialog
-            language={T('zh-cn')}
+          <UiDialog
+            className="ui-nodeInfo"
             visible={this.state.nodeConfigVisible}
             title={T('配置需连接的节点')}
-            footerActions="ok"
-            footerAlign="center"
-            closeable="true"
             onOk={this.onConfigNodeOK.bind(this)}
-            onCancel={() => this.setState({ nodeConfigVisible: false })}
-            onClose={() => this.setState({ nodeConfigVisible: false })}>
-            <Select
-              language={T('zh-cn')}
-              style={{ width: 400 }}
-              placeholder={T('选择节点')}
-              onChange={this.onChangeNode.bind(this, 'nodeInfo')}
-              value={this.state.nodeInfo}
-              defaultValue={constant.mainNet1RPCHttpsAddr}
-              dataSource={this.state.nodes}
-            />
-            <br />
-            <br />
-            <Input
-              hasClear
-              disabled={this.state.customNodeDisabled}
-              onChange={this.handleNodeInfoChange.bind(this)}
-              style={{ width: 400 }}
-              innerBefore="RPC URL"
-              size="medium"
-              defaultValue={this.state.nodeInfo}
-              maxLength={150}
-              hasLimitHint
-            />
-          </Dialog>
+            onCancel={() => this.setState({ nodeConfigVisible: false })}>
+            <div className="ui-dialog-data">
+              <Select
+                language={T('zh-cn')}
+                style={{ width: 400 }}
+                placeholder={T('选择节点')}
+                onChange={this.onChangeNode.bind(this, 'nodeInfo')}
+                value={this.state.nodeInfo}
+                defaultValue={constant.mainNet1RPCHttpsAddr}
+                dataSource={this.state.nodes}
+              />
+              <br />
+              <br />
+              <Input
+                hasClear
+                disabled={this.state.customNodeDisabled}
+                onChange={this.handleNodeInfoChange.bind(this)}
+                style={{ width: 400 }}
+                innerBefore="RPC URL"
+                size="medium"
+                defaultValue={this.state.nodeInfo}
+                maxLength={150}
+                hasLimitHint
+              />
+            </div>
+          </UiDialog>
+
           <Dialog
             language={T('zh-cn')}
             visible={this.state.accountConfigVisible}

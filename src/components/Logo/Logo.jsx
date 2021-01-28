@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { Link } from 'react-router-dom';
 import * as oexchain from 'oex-web3';
 import { T } from '../../utils/lang';
+import { Iconfont } from '../iconfont';
 
 export default class Logo extends PureComponent {
   constructor(props) {
@@ -24,9 +25,7 @@ export default class Logo extends PureComponent {
   render() {
     return (
       <Link to="/" className="logo">
-        <svg className="iconfont" aria-hidden="true">
-          <use href="#icon-oex"></use>
-        </svg>
+        <Iconfont icon="oex" primary></Iconfont>
         <div to="/" className="logo-text">
           OEX Swap
         </div>
