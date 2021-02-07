@@ -15,7 +15,7 @@ export const updateUserPairIndexList = (newList) => {
 export const pushToUserPairIndexList = (pairIndex) => {
   const index = UserPairIndexList.indexOf(pairIndex);
   if (index !== -1) return; // 已经在里面了
-  UserPairIndexList.push(index);
+  UserPairIndexList.push(pairIndex);
   updateUserPairIndexList(UserPairIndexList);
 };
 
