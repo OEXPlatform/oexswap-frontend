@@ -12,15 +12,15 @@ export const updateUserPairIndexList = (newList) => {
   localStorage.setItem(localKey, JSON.stringify(UserPairIndexList));
 };
 
-export const pushToUserPairIndexList = (index) => {
-  const index = UserPairIndexList.indexOf(index);
+export const pushToUserPairIndexList = (pairIndex) => {
+  const index = UserPairIndexList.indexOf(pairIndex);
   if (index !== -1) return; // 已经在里面了
   UserPairIndexList.push(index);
   updateUserPairIndexList(UserPairIndexList);
 };
 
-export const popFromUserPairIndexList = (index) => {
-  const index = UserPairIndexList.indexOf(index);
+export const popFromUserPairIndexList = (pairIndex) => {
+  const index = UserPairIndexList.indexOf(pairIndex);
   if (index === -1) return; // 本就不在里面
   UserPairIndexList.splice(index, 1);
   updateUserPairIndexList(UserPairIndexList);
