@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { Link } from 'react-router-dom';
 import * as oexchain from 'oex-web3';
 import { T } from '../../utils/lang';
-import { Iconfont } from '../iconfont';
+import { Iconfont } from '../Ui/iconfont';
 
 export default class Logo extends PureComponent {
   constructor(props) {

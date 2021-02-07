@@ -24,8 +24,8 @@ import { T, setLang } from '../../utils/lang';
 import eventProxy from '../../utils/eventProxy';
 import BigNumber from 'bignumber.js';
 import './scss/ui.scss';
-import { Iconfont } from '../iconfont';
-import { UiDialog } from '../UiDialog';
+import { Iconfont } from '../Ui/iconfont';
+import { UiDialog } from '../Ui/UiDialog';
 
 // import { BigNumber } from 'ethers/utils';
 const { Row } = Grid;

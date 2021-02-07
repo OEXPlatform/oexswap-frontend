@@ -20,6 +20,9 @@ svg path:nth-child(1) {
 .icon-path-2-gray path:nth-child(2) {
   fill: #f2f3f4;
 }
+.ui-primary {
+  color: #00c9a7;
+}
 
 // 页内弹窗
 .ui-dialog {
@@ -147,6 +150,369 @@ svg path:nth-child(1) {
           box-shadow: 0 1px 6px 1px rgba(#aaa, 0.8);
         }
       }
+    }
+  }
+}
+
+.ui-dialog2 {
+  position: fixed !important;
+  top: 60px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: calc(100vh - 60px) !important;
+  background-color: #f2f3f4;
+  .next-dialog-close {
+    display: none;
+  }
+  .ui-out {
+    position: absolute;
+    font-size: 24px;
+    right: 26px;
+    top: 26px;
+    cursor: pointer;
+  }
+
+  // 弹窗内容
+  .ui-dialog-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 100px;
+    margin: auto;
+    height: 626px;
+    .ui-dialog-body {
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+      border-radius: 36px;
+      padding-bottom: 26px;
+
+      .ui-dialog-header {
+        height: 80px;
+        overflow: hidden;
+        line-height: 100px;
+        position: relative;
+        // border-bottom: 1px solid #c9cace;
+        z-index: 3;
+
+        .ui-dialog-title {
+          font-size: 18px;
+          font-weight: 500;
+          color: #00c9a7;
+          text-align: center;
+          text-shadow: 0px 0px 1px #00c9a7;
+        }
+      }
+
+      .ui-dialog-data {
+        height: 520px;
+        background-color: #fff;
+        overflow: auto;
+        &::-webkit-scrollbar {
+          height: 0;
+          width: 0;
+          background: transparent;
+        }
+        &::-webkit-scrollbar-thumb {
+          width: 0;
+          min-height: 15px;
+          background: transparent;
+        }
+        &::-webkit-scrollbar-thumb:active,
+        &::-webkit-scrollbar-thumb:hover {
+          background: transparent;
+        }
+      }
+    }
+  }
+}
+
+.ui-dialog3 {
+  position: fixed !important;
+  top: 60px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: calc(100vh - 60px) !important;
+  background-color: rgba(#141426, 0.5);
+  .next-dialog-close {
+    display: none;
+  }
+  .ui-out {
+    position: absolute;
+    font-size: 24px;
+    right: 26px;
+    top: 26px;
+    cursor: pointer;
+  }
+
+  // 弹窗内容
+  .ui-dialog-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 100px;
+    margin: auto;
+    height: 360px;
+    .ui-dialog-body {
+      overflow: hidden;
+      background: #fafafa;
+      // box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+      border-radius: 36px;
+      // padding-bottom: 26px;
+
+      .ui-dialog-header {
+        height: 80px;
+        overflow: hidden;
+        line-height: 100px;
+        position: relative;
+        // border-bottom: 1px solid #c9cace;
+        z-index: 3;
+
+        .ui-dialog-title {
+          font-size: 18px;
+          font-weight: 500;
+          color: #00c9a7;
+          text-align: center;
+          text-shadow: 0px 0px 1px #00c9a7;
+        }
+      }
+    }
+  }
+}
+
+.ui-SwapDetail {
+  width: 394px;
+  .ui-SwapDetail-symbol {
+    display: flex;
+    height: 80px;
+    width: 100%;
+    justify-content: center;
+    .ui-SwapDetail-symbol-body {
+      width: 130px;
+      position: relative;
+      overflow: hidden;
+      & > div {
+        padding-top: 20px;
+        div {
+          padding-left: 40px;
+          font-size: 12px;
+          word-break: break-all;
+          max-width: 128px;
+          &.ui-div1 {
+            color: #191930;
+          }
+          &.ui-div2 {
+            color: #8687a3;
+          }
+        }
+        img {
+          width: 34px;
+          height: 34px;
+          position: absolute;
+        }
+      }
+    }
+    .ui-SwapDetail-symbol-join {
+      line-height: 80px;
+      font-size: 30px;
+      padding: 0 16px;
+      color: #c9cace;
+    }
+  }
+  .ui-SwapDetail-total {
+    width: 342px;
+    height: 78px;
+    background: #00c9a7;
+    border: 3px solid #affcea;
+    border-radius: 40px;
+    margin: 0 auto;
+    .ui-pairInfo-num {
+      color: #fff;
+    }
+    .ui-pair-symbol {
+      color: #008e75;
+    }
+  }
+  .ui-SwapDetail-accountHeader {
+    color: #141426;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 42px 8px;
+  }
+  .ui-SwapDetail-account {
+    width: 400px;
+    margin: 0 auto;
+    height: 290px;
+    position: relative;
+    overflow: hidden;
+    .ui-after,
+    .ui-before {
+      position: absolute;
+      right: 0;
+      left: 0;
+      height: 25px;
+      z-index: 1;
+      margin: 0 auto;
+    }
+    .ui-before {
+      top: 0;
+      // background-image: linear-gradient(to bottom, rgba(156, 156, 156, 0.1), rgba(156, 156, 156, 0));
+    }
+    .ui-after {
+      bottom: 0;
+      // background-image: linear-gradient(to top, rgba(156, 156, 156, 0.1), rgba(156, 156, 156, 0));
+    }
+    > div {
+      width: 356px + 6px;
+      height: 290px;
+      position: absolute;
+      top: 0;
+      left: 6px;
+      right: -6px;
+      bottom: 0;
+      margin: auto;
+      padding-right: 6px;
+      overflow: auto;
+      &::-webkit-scrollbar {
+        // height: 4px;
+        width: 4px;
+        min-height: 15px;
+        background: rgba(134, 135, 163, 0.1);
+        // border: 1px solid rgba(134, 135, 163, 0.1);
+        border-radius: 2px;
+      }
+      &::-webkit-scrollbar-thumb {
+        width: 10px;
+        height: 10px;
+        background: #00c9a7;
+        border: 2px solid rgba(175, 252, 234, 0.4);
+      }
+      &::-webkit-scrollbar-thumb:active,
+      &::-webkit-scrollbar-thumb:hover {
+        width: 10px;
+        height: 10px;
+        background: #00c9a7;
+        border: 2px solid rgba(175, 252, 234, 0.4);
+      }
+    }
+    .ui-SwapDetail-acc {
+      width: 342px;
+      height: 52px;
+      background: #f2f3f4;
+      border-radius: 6px;
+      margin: 0 auto;
+      & + .ui-SwapDetail-acc {
+        margin-top: 12px;
+      }
+      padding-top: 8px;
+      font-size: 12px;
+      color: rgba(20, 20, 38, 1);
+      > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 16px;
+        line-height: 20px;
+      }
+    }
+  }
+}
+
+.ui-MySwapDetail {
+  width: 394px;
+  .ui-MySwapDetail-account {
+    width: 400px;
+    margin: 0 auto;
+    height: 520px;
+    position: relative;
+    overflow: hidden;
+    > div {
+      height: 520px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+      padding-right: 6px;
+      width: 380px;
+      overflow: auto;
+      &::-webkit-scrollbar {
+        // height: 4px;
+        width: 4px;
+        min-height: 15px;
+        background: rgba(134, 135, 163, 0.1);
+        // border: 1px solid rgba(134, 135, 163, 0.1);
+        border-radius: 2px;
+      }
+      &::-webkit-scrollbar-thumb {
+        width: 10px;
+        height: 10px;
+        background: #00c9a7;
+        border: 2px solid rgba(175, 252, 234, 0.4);
+      }
+      &::-webkit-scrollbar-thumb:active,
+      &::-webkit-scrollbar-thumb:hover {
+        width: 10px;
+        height: 10px;
+        background: #00c9a7;
+        border: 2px solid rgba(175, 252, 234, 0.4);
+      }
+    }
+    .ui-MySwapDetail-acc {
+      width: 342px;
+      height: 52px;
+      background: #f2f3f4;
+      border-radius: 6px;
+      margin: 0 auto;
+      & + .ui-MySwapDetail-acc {
+        margin-top: 12px;
+      }
+      padding-top: 8px;
+      font-size: 12px;
+      color: rgba(20, 20, 38, 1);
+      > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 16px;
+        line-height: 20px;
+      }
+    }
+  }
+}
+
+.ui-MySwapDetail-Body {
+  width: 344px;
+  .ui-MySwapDetail-BodyContent {
+    width: 344px;
+    margin: 0 auto;
+    height: 280px;
+    position: relative;
+    overflow: hidden;
+    padding: 0 20px;
+    input {
+      border: none;
+      border-bottom: 1px solid #ccc;
+      outline: none;
+      text-align: right;
+      margin-left: 16px;
+      font-size: 18px;
+      color: #050b30;
+      font-weight: bold;
+      width: 234px;
+    }
+    .ui-submit-danger {
+      width: 302px;
+      height: 40px;
+      margin: 0 auto;
+      border-radius: 20px;
+      line-height: 40px;
+      text-align: center;
+      background-color: #fe3d5b;
+      color: #fff;
+      cursor: pointer;
     }
   }
 }
@@ -353,4 +719,56 @@ svg path:nth-child(1) {
   height: 0;
   clear: both;
   visibility: hidden;
+}
+
+.ui-ProgressControl {
+  height: 60px;
+  position: relative;
+  user-select: none;
+  .ui-bar,
+  .ui-value {
+    border-radius: 2px;
+    height: 3px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 10px;
+    cursor: pointer;
+  }
+  .ui-radius {
+    border-radius: 8px;
+    width: 8px;
+    height: 8px;
+    top: 7px;
+    position: absolute;
+    cursor: pointer;
+    margin-left: -4px;
+  }
+  .ui-bar {
+    background: #a4a4a4;
+  }
+  .ui-value {
+    background: #fc355f;
+    &::after {
+      content: ' ';
+      width: 20px;
+      height: 20px;
+      position: absolute;
+      top: -9px;
+      right: -8px;
+      background-color: #fff;
+      box-shadow: 0 0px 5px #000;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+    }
+  }
+  .ui-value-show {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(20, 20, 38, 1);
+    font-size: 14px;
+  }
 }

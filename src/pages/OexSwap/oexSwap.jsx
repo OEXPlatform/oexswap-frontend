@@ -16,15 +16,23 @@ import { T } from '../../utils/lang';
 import * as Constant from '../../utils/constant';
 import './style.scss';
 import './ui.scss';
-import { UiDialog } from '../../components/UiDialog';
-import { Iconfont } from '../../components/iconfont';
+import { UiDialog } from '../../components/Ui/UiDialog';
+import { UiDialog2 } from '../../components/Ui/UiDialog2';
+import { UiDialog3 } from '../../components/Ui/UiDialog3';
+import { UiProgressControl } from '../../components/Ui/UiProgressControl';
+
+import { Iconfont } from '../../components/Ui/iconfont';
+import { getAssetInfoById } from '../../utils/oexSDK';
+import { updateUserPairIndexList, UserPairIndexList } from '../../utils/userPairList';
 
 const { Row, Col } = Grid;
 // const oexLogo =
-const oexToken = require('./images/oexToken.png');
+const oexTokenLogo = require('./images/oexToken.png');
 const PNG_max = require('./images/max.png');
 const PNG_transfer = require('./images/transfer.png');
-const otherToken = require('./images/default-logo.png');
+const otherTokenLogo = require('./images/default-logo.png');
+const PNG_ctTop = require('./images/ct-top.png');
+const PNG_ctBottom = require('./images/ct-bottom.png');
 
 const toleranceData = [
   { label: '0.1%', value: 1 },
@@ -51,6 +59,17 @@ export default class OexSwap extends Component {
       toInfo: { value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null },
       assetList: [],
       assetSelectorDialogVisible: false,
+      swapPoolDialogVisible: false,
+      swapPoolDialogData: null,
+
+      mySwapPoolDialogVisible: false,
+      mySwapPoolDialogData: [],
+      myOutPoolDialogVisible: false,
+      myOutPoolDialogData: null,
+      outPoolValue: 50,
+      outPoolAmount: 0,
+      UiProgressControlKey: 0, // 控制子组件渲染
+
       assetDisplayList: [],
       isFromAsset: true,
       pairList: [],
@@ -71,6 +90,7 @@ export default class OexSwap extends Component {
       inputTolerance: 0,
       gasPrice: 100,
       gasLimit: 1000000,
+      pairAssetInfoData: null,
       pairAssetInfo: '',
       password: '',
       bLiquidOp: false,
@@ -130,19 +150,17 @@ export default class OexSwap extends Component {
             const awaitList = [];
             if (this.state.assetInfoMap[pairInfo.firstAssetId] == null) {
               awaitList.push(
-                oexchain.account.getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
-                  if (assetInfo != null) {
-                    this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
-                  }
+                getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
+                  if (!assetInfo) return;
+                  this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
                 })
               );
             }
             if (this.state.assetInfoMap[pairInfo.secondAssetId] == null) {
               awaitList.push(
-                oexchain.account.getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
-                  if (assetInfo != null) {
-                    this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
-                  }
+                getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
+                  if (!assetInfo) return;
+                  this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
                 })
               );
             }
@@ -482,6 +500,7 @@ export default class OexSwap extends Component {
 
   setPairAssetInfo(firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo) {
     this.setState({
+      pairAssetInfoData: { firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo },
       pairAssetInfo: (
         <div className="ui-pairInfo-num">
           <div className="ui-pairInfo-first ui-ell ui-clearfix" title={firstAssetAmount}>
@@ -538,9 +557,9 @@ export default class OexSwap extends Component {
         }
       }
       return (
-        <div className={classNames.join(' ')} style={{ cursor: needBtn ? 'pointer' : 'default' }} onClick={() => needBtn && this.clickAsset(assetInfo)}>
+        <div key={assetInfo.symbol} className={classNames.join(' ')} style={{ cursor: needBtn ? 'pointer' : 'default' }} onClick={() => needBtn && this.clickAsset(assetInfo)}>
           <font className="ui-assetInfo-account">持有账户数: {assetInfo.stats}</font>
-          <img src={assetInfo.assetid == 0 ? oexToken : otherToken} />
+          <img src={assetInfo.assetid == 0 ? oexTokenLogo : otherTokenLogo} />
           <div className="ui-assetInfo-symbol">
             {symbol}
             <span>ID:{assetInfo.assetid}</span>
@@ -867,7 +886,7 @@ export default class OexSwap extends Component {
     var miningSettingInfos = [];
     this.state.miningInfo.miningSettings.map((miningSetting, index) => {
       miningSettingInfos.push(
-        <p>
+        <p key={index}>
           阶段{index + 1}: 从区块高度{miningSetting.startBlockNumber}开始，每个区块产出:
           {new BigNumber(miningSetting.reward).shiftedBy(-18).toNumber()} OEX
         </p>
@@ -891,6 +910,111 @@ export default class OexSwap extends Component {
 
     this.setState({ fromInfo, toInfo, pairListVisible: false });
     this.updateBaseInfoByPairInfo(pairInfo, fromInfo, toInfo);
+  };
+
+  openSwapPoolDialog() {
+    // pairAssetInfoData: { firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo };
+    this.setState({ swapPoolDialogData: null, swapPoolDialogVisible: true });
+  }
+
+  /**
+   * 用户开启【我的资金池】界面，开始加载自己的流动性数据
+   */
+  openMySwapPoolDialog() {
+    const mySwapPoolDialogData = [];
+    const myPairIndexList = [...UserPairIndexList]; // 用户提供流动性数据的交易对 index 缓存
+
+    // 优先加载已知的提供流动性数据
+    const myPairList = this.state.pairList.filter((item) => UserPairIndexList.includes(item.index));
+    const otherPairList = this.state.pairList.filter((item) => !UserPairIndexList.includes(item.index));
+    Promise.all(myPairList.map((item) => this.getUserPaire(mySwapPoolDialogData, myPairIndexList, item, true))).then(() => {
+      otherPairList.forEach((item) => this.getUserPaire(mySwapPoolDialogData, myPairIndexList, item)); // 必要数据加载完后，再判断非必要数据
+    });
+
+    this.setState({ mySwapPoolDialogVisible: true });
+  }
+  // loadingFirst 是否在加载前就展示出占位的样式
+  async getUserPaire(mySwapPoolDialogData, myPairIndexList, pairInfo, loadingFirst = false) {
+    const inIndex = myPairIndexList.indexOf(pairInfo.index);
+    const render = () => {
+      this.setState({ mySwapPoolDialogData: mySwapPoolDialogData.filter((item) => item.display) });
+    };
+    const data = {
+      key: pairInfo.index,
+      display: true, // 默认显示
+      firstAsset: null,
+      secondAsset: null,
+      totalLiquid: 0,
+      userLiquid: 0,
+      myPercent: 0,
+      bigRemoveNum: 0,
+    };
+    if (loadingFirst) mySwapPoolDialogData.push(data);
+    render();
+    const [userLiquid, totalLiquid, firstAsset, secondAsset] = await Promise.all([
+      this.getUserLiquidInPair(pairInfo.index, this.state.account.accountID),
+      this.getPairTotalLiquid(pairInfo.index),
+      getAssetInfoById(pairInfo.firstAssetId),
+      getAssetInfoById(pairInfo.secondAssetId),
+    ]);
+    if (userLiquid.isEqualTo(0) || totalLiquid.isEqualTo(0)) {
+      data.display = false;
+      if (inIndex !== -1) {
+        myPairIndexList.splice(inIndex, 1); // 不在提供流动性
+        updateUserPairIndexList(myPairIndexList);
+      }
+      return render(); // 没有流动性提供
+    }
+    Object.assign(data, {
+      pairInfo,
+      key: pairInfo.index,
+      firstAsset,
+      secondAsset,
+      totalLiquid: totalLiquid.multipliedBy(100).toNumber(),
+      userLiquid: userLiquid.multipliedBy(100).toNumber(),
+      myPercent: userLiquid.dividedBy(totalLiquid).multipliedBy(100).toFixed(2),
+      bigRemoveNum: userLiquid.multipliedBy(100).shiftedBy(-firstAsset.decimals).toNumber(),
+      bigRemoveBigNum: userLiquid.multipliedBy(100),
+    });
+    if (!loadingFirst) mySwapPoolDialogData.push(data);
+    render();
+    if (inIndex !== -1) return; // 已经在里面了
+    myPairIndexList.push(pairInfo.index);
+    updateUserPairIndexList(myPairIndexList);
+  }
+  // 打开退出流动性弹窗
+  outPoolDialogOpen(item) {
+    this.state.myOutPoolDialogData = item;
+    this.updateOutPoolValue(50);
+    this.setState({ myOutPoolDialogVisible: true, myOutPoolDialogData: item });
+  }
+  outPoolAmountChange(evt) {
+    const val = new BigNumber(evt.currentTarget.value);
+    if (val.isNaN()) return;
+    const { bigRemoveBigNum, firstAsset } = this.state.myOutPoolDialogData;
+    const outPoolValue = val.shiftedBy(firstAsset.decimals).dividedBy(bigRemoveBigNum).multipliedBy(100).toNumber();
+    this.setState({ outPoolValue, outPoolAmount: val.toNumber(), UiProgressControlKey: ++this.state.UiProgressControlKey });
+  }
+  updateOutPoolValue(outPoolValue) {
+    const { bigRemoveBigNum, firstAsset } = this.state.myOutPoolDialogData;
+    const amount = bigRemoveBigNum.multipliedBy(outPoolValue).dividedBy(100).shiftedBy(-firstAsset.decimals).toNumber();
+    this.setState({ outPoolValue, outPoolAmount: amount });
+  }
+  myOutPoolSubmit() {
+    this.setState({ myOutPoolDialogVisible: false, callbackFunc: this.removeLiquidity2, txInfoVisible: true });
+  }
+  removeLiquidity2 = (gasInfo, privateKey) => {
+    const { firstAsset, pairInfo } = this.state.myOutPoolDialogData;
+    const { outPoolAmount, contractName, accountName } = this.state;
+    const liquidRemoved = '0x' + new BigNumber(outPoolAmount).shiftedBy(firstAsset.decimals - 2).toString(16);
+    let actionInfo = { accountName, toAccountName: contractName, assetId: 0, amount: new BigNumber(0), remark: '' };
+    let payloadInfo = { funcName: 'removeLiquidity', types: ['uint256', 'uint256'], values: [pairInfo.index, liquidRemoved] };
+    oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then((txHash) => {
+      this.checkReceipt(txHash, {
+        txHash,
+        actionInfo: { typeId: 1, typeName: '移除流动性', accountName },
+      });
+    });
   };
 
   render() {
@@ -1006,10 +1130,12 @@ export default class OexSwap extends Component {
               {this.state.bLiquidOp ? (
                 <Row justify="start" align="center" className="ui-swap-info-row">
                   <font>流动池数量</font>
-                  <span style={{ marginLeft: '10px', color: '#00C9A7', cursor: 'pointer' }}>资金池详情&gt;</span>
+                  {/* <span style={{ marginLeft: '10px', color: '#00C9A7', cursor: 'pointer' }} onClick={() => this.openSwapPoolDialog()}>
+                    资金池详情&gt;
+                  </span> */}
                   {this.state.pairAssetInfo}
                   {this.isPairNormal() > 0 && (
-                    <div className="ui-my-pairInfo" onClick={() => this.startRemoveLiquidity()}>
+                    <div className="ui-my-pairInfo" onClick={() => this.openMySwapPoolDialog()}>
                       <div></div>
                       <div>我的做市</div>
                       <div>&gt;</div>
@@ -1047,10 +1173,284 @@ export default class OexSwap extends Component {
 
           </Card> */}
         </Row>
+
+        <UiDialog2 className="ui-SwapDetail" visible={this.state.swapPoolDialogVisible} title="资金池详情" onCancel={() => this.setState({ swapPoolDialogVisible: false })}>
+          {this.state.pairAssetInfoData ? (
+            <div className="ui-dialog-data">
+              <div className="ui-SwapDetail-symbol">
+                <div className="ui-SwapDetail-symbol-body">
+                  <div>
+                    <img src={this.state.pairAssetInfoData.firstAssetInfo.assetId === 0 ? oexTokenLogo : otherTokenLogo}></img>
+                    <div className="ui-div1">{this.state.pairAssetInfoData.firstAssetInfo.symbol.toLocaleUpperCase()}</div>
+                    <div className="ui-div2 ui-ell2">{this.state.pairAssetInfoData.firstAssetInfo.assetName}</div>
+                  </div>
+                </div>
+                <div className="ui-SwapDetail-symbol-join">+</div>
+                <div className="ui-SwapDetail-symbol-body">
+                  <div style={{ float: 'right' }}>
+                    <img src={this.state.pairAssetInfoData.secondAssetInfo.assetId === 0 ? oexTokenLogo : otherTokenLogo}></img>
+                    <div className="ui-div1">{this.state.pairAssetInfoData.secondAssetInfo.symbol.toLocaleUpperCase()}</div>
+                    <div className="ui-div2 ui-ell2">{this.state.pairAssetInfoData.secondAssetInfo.assetName}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="ui-SwapDetail-total">
+                <div style={{ color: '#0C5453', fontSize: '12px', textAlign: 'center', margin: '10px 0' }}>流动池数量</div>
+                {this.state.pairAssetInfo}
+              </div>
+
+              <div class="ui-SwapDetail-accountHeader">
+                <div>账户列表</div>
+                <div>账户数：45</div>
+              </div>
+              <div className="ui-SwapDetail-account">
+                <img className="ui-before" src={PNG_ctTop} />
+                <img className="ui-after" src={PNG_ctBottom} />
+                <div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-SwapDetail-acc">
+                    <div>
+                      <span>sadasd**sd</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="ui-primary">占比12.9%</span>
+                      <div>
+                        23434.3434 <span className="ui-primary">OEX</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            ''
+          )}
+        </UiDialog2>
+
+        <UiDialog2 className="ui-MySwapDetail" visible={this.state.mySwapPoolDialogVisible} title="我的资金池" onCancel={() => this.setState({ mySwapPoolDialogVisible: false })}>
+          {this.state.pairAssetInfoData ? (
+            <div className="ui-dialog-data">
+              <div className="ui-MySwapDetail-account">
+                <div>
+                  {this.state.mySwapPoolDialogData.map((item) => {
+                    if (item.firstAsset) {
+                      return (
+                        <div className="ui-MySwapDetail-acc" key={item.key}>
+                          <div>
+                            <span>
+                              {item.firstAsset.symbol.toLocaleUpperCase()} / {item.secondAsset.symbol.toLocaleUpperCase()}
+                            </span>
+                            <div className="ui-primary">占比{item.myPercent}%</div>
+                          </div>
+                          <div key={2}>
+                            <span className="ui-primary">{item.bigRemoveNum} 个</span>
+                            <div
+                              onClick={() => this.outPoolDialogOpen(item)}
+                              style={{ borderRadius: '10px', padding: '0 8px', backgroundColor: '#00c9a7', color: '#555', cursor: 'pointer', transform: 'transform: scale(0.9)' }}>
+                              退出流动性
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return <div className="ui-MySwapDetail-acc ui-loading" key={item.key}></div>;
+                    }
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            ''
+          )}
+        </UiDialog2>
+
+        <UiDialog3 className="ui-MySwapDetail-Body" title="退出流动性" visible={this.state.myOutPoolDialogVisible} onCancel={() => this.setState({ myOutPoolDialogVisible: false })}>
+          {this.state.myOutPoolDialogData ? (
+            <div className="ui-dialog-data">
+              <div className="ui-MySwapDetail-BodyContent">
+                <div>
+                  <span style={{ fontSize: '12px', color: '#5E768B', fontWeight: '400' }}>流动性/个</span>
+                  <input max={this.state.bigRemoveNum} min={0} value={this.state.outPoolAmount} onChange={this.outPoolAmountChange.bind(this)}></input>
+                </div>
+                <div style={{ fontSize: '12px', color: '#5E768B', marginTop: '10px', textAlign: 'right' }}>
+                  {this.state.myOutPoolDialogData.firstAsset.symbol.toLocaleUpperCase()} / {this.state.myOutPoolDialogData.secondAsset.symbol.toLocaleUpperCase()}
+                </div>
+                <UiProgressControl
+                  key={this.state.UiProgressControlKey}
+                  style={{ marginTop: '26px' }}
+                  value={this.state.outPoolValue}
+                  onUpdate={(newVal) => this.updateOutPoolValue(newVal)}></UiProgressControl>
+                <div className="ui-submit-danger" onClick={() => this.myOutPoolSubmit()} style={{ marginTop: '70px' }}>
+                  退出流动池
+                </div>
+              </div>
+            </div>
+          ) : (
+            ''
+          )}
+        </UiDialog3>
+
         <UiDialog
           className="ui-SelectAsset"
           visible={this.state.assetSelectorDialogVisible}
-          title={[<Iconfont icon="asset" primary></Iconfont>, T('选择资产')]}
+          title={[<Iconfont key={2} icon="asset" primary></Iconfont>, T('选择资产')]}
           header={
             <div className="ui-dialog-search">
               <Input
@@ -1110,7 +1510,7 @@ export default class OexSwap extends Component {
           <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px' }}>当前挖矿计划:</Row>
           {this.state.miningInfo.miningSettings.map((miningSetting, index) => {
             return (
-              <Row style={{ color: 'white', marginLeft: '40px', marginTop: '10px' }}>
+              <Row key={index} style={{ color: 'white', marginLeft: '40px', marginTop: '10px' }}>
                 阶段{index + 1}: 从区块高度{miningSetting.startBlockNumber}开始，每个区块产出: {new BigNumber(miningSetting.reward).shiftedBy(-18).toNumber()} OEX
               </Row>
             );
@@ -1169,7 +1569,7 @@ export default class OexSwap extends Component {
         <UiDialog
           className="ui-pairList"
           visible={this.state.myTxInfoVisible}
-          title={[<Iconfont icon="history" primary></Iconfont>, T('交易记录')]}
+          title={[<Iconfont key={2} icon="history" primary></Iconfont>, T('交易记录')]}
           onOk={() => this.setState({ myTxInfoVisible: false })}
           onCancel={() => this.setState({ myTxInfoVisible: false })}>
           <IceContainer className="ui-dialog-data">
@@ -1189,7 +1589,7 @@ export default class OexSwap extends Component {
         <UiDialog
           className="ui-pairList"
           visible={this.state.pairListVisible}
-          title={[<Iconfont icon="swap" primary></Iconfont>, T('所有交易对')]}
+          title={[<Iconfont key={2} icon="swap" primary></Iconfont>, T('所有交易对')]}
           onOk={() => this.setState({ pairListVisible: false })}
           onCancel={() => this.setState({ pairListVisible: false })}>
           <IceContainer className="ui-dialog-data">
