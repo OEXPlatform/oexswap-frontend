@@ -31,6 +31,7 @@ import { UiDialog } from '../Ui/UiDialog';
 const { Row } = Grid;
 export const history = createHashHistory();
 const keyMap = { dashboard: '0', Block: '1', Transaction: '2', assetOperator: '3', contractDev: '4', producerList: '5' };
+const PNG_lang_en = require('./images/en.png');
 
 export default class Header extends PureComponent {
   constructor(props) {
@@ -344,6 +345,8 @@ export default class Header extends PureComponent {
             <Iconfont icon="gift" style={{ marginRight: '8px', fontSize: '16px' }} primary></Iconfont>
             邀请奖励
           </Button>
+
+          <img src={PNG_lang_en}></img>
           <UiDialog
             className="ui-nodeInfo"
             visible={this.state.nodeConfigVisible}

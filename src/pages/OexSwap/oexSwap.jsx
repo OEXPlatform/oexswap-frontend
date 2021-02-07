@@ -164,9 +164,10 @@ export default class OexSwap extends Component {
                 })
               );
             }
-
             // 默认选一个
             if (i === 0 && !this.state.fromInfo.selectAssetInfo && !this.state.toInfo.selectAssetInfo) {
+              if (!this.state.assetInfoMap[pairInfo.secondAssetId]) return;
+              if (!this.state.assetInfoMap[pairInfo.firstAssetId]) return;
               Promise.all(awaitList).then(() => this.startExchange(pairInfo));
             }
           });

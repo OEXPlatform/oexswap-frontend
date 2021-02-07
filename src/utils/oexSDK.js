@@ -3,8 +3,9 @@ import * as oexchain from 'oex-web3';
 const getAssetInfoHandler = {};
 const AssetInfoCache = JSON.parse(localStorage.getItem('AssetInfoCache') || '{}');
 const AssetInfoCacheSave = (asset) => {
-  AssetInfoCache[res.assetId] = res.assetName;
-  AssetInfoCache[res.assetName] = res;
+  asset.__Time = Date.now();
+  AssetInfoCache[asset.assetId] = asset.assetName;
+  AssetInfoCache[asset.assetName] = asset;
   localStorage.setItem('AssetInfoCache', JSON.stringify(AssetInfoCache));
 };
 const OneDay = 24 * 60 * 60 * 1000;
