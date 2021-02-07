@@ -220,7 +220,9 @@ export default class OexSwap extends Component {
   getUserLiquidInPair = async (pairIndex) => {
     const payloadInfo = { funcName: 'getUserLiquid', types: ['uint256'], values: [pairIndex] };
     const userLiquid = await oexchain.action.readContract(this.state.accountName, this.state.contractName, payloadInfo, 'latest');
-    return new BigNumber(userLiquid);
+    const res = new BigNumber(userLiquid);
+    if (res.isGreaterThan(0)) pushToUserPairIndexList(pairIndex);
+    return res;
   };
 
   addLiquidity = (gasInfo, privateKey) => {
