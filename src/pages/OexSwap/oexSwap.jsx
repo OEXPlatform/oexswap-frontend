@@ -1041,19 +1041,22 @@ export default class OexSwap extends Component {
             <div style={styles.card1}>
               <div className="ui-swap-tab">
                 <div className={cx({ 'ui-select': !this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(false)}>
-                  兑换
+                  {T('兑换')}
                 </div>
                 <div className={cx({ 'ui-select': this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(true)}>
-                  资金池
+                  {T('资金池')}
                 </div>
               </div>
               <div className="ui-card2">
                 <div style={styles.assetAmounInfo}>
                   <div>
-                    <font>余额：</font>
+                    <font>{T('余额：')}</font>
                     <font>{this.state.fromInfo.maxValue}</font>
                   </div>
-                  <font>资产ID：{this.state.fromInfo.selectAssetInfo && this.state.fromInfo.selectAssetInfo.assetid}</font>
+                  <font>
+                    {T('资产ID：')}
+                    {this.state.fromInfo.selectAssetInfo && this.state.fromInfo.selectAssetInfo.assetid}
+                  </font>
                 </div>
                 <div>
                   <Input
@@ -1074,10 +1077,13 @@ export default class OexSwap extends Component {
               <div className="ui-card2" style={{ marginTop: '10px' }}>
                 <div style={styles.assetAmounInfo}>
                   <div>
-                    <font>余额：</font>
+                    <font>{T('余额：')}</font>
                     <font>{this.state.toInfo.maxValue}</font>
                   </div>
-                  <font>资产ID：{this.state.toInfo.selectAssetInfo && this.state.toInfo.selectAssetInfo.assetid}</font>
+                  <font>
+                    {T('资产ID：')}
+                    {this.state.toInfo.selectAssetInfo && this.state.toInfo.selectAssetInfo.assetid}
+                  </font>
                 </div>
                 <div>
                   <Input
@@ -1094,7 +1100,7 @@ export default class OexSwap extends Component {
                 {/* </div> */}
               </div>
               <Row justify="start" align="center" className="ui-swap-info-row" style={{ marginTop: '22px' }}>
-                <font>可接受的最大滑点:</font>
+                <font>{T('可接受的最大滑点：')}</font>
                 {this.state.toleranceInputEnable && (
                   <Input
                     autoFocus
@@ -1113,11 +1119,11 @@ export default class OexSwap extends Component {
                 />
               </Row>
               <Row justify="start" align="center" className="ui-swap-info-row">
-                <font>兑换手续费:</font>
+                <font>{T('兑换手续费：')}</font>
                 <div style={{ float: 'right' }}>{this.state.feeRate / 10} %</div>
               </Row>
               <Row justify="start" align="center" className="ui-swap-info-row">
-                <font>您的流动性占比:</font>
+                <font>{T('您的流动性占比：')}</font>
                 <div style={{ float: 'right' }}>{this.state.curPairInfo.myPercent} %</div>
                 {/* {this.state.curPairInfo.myPercent > 0 && (
                   <Button type="primary" className="maxButton" style={{ marginLeft: '20px', width: '80px' }} onClick={() => this.startRemoveLiquidity()}>
@@ -1127,40 +1133,40 @@ export default class OexSwap extends Component {
               </Row>
               {this.state.bLiquidOp ? (
                 <Row justify="start" align="center" className="ui-swap-info-row">
-                  <font>流动池数量</font>
+                  <font>{T('流动池数量')}</font>
                   {/* <span style={{ marginLeft: '10px', color: '#00C9A7', cursor: 'pointer' }} onClick={() => this.openSwapPoolDialog()}>
-                    资金池详情&gt;
+                    资金池详情 &gt;
                   </span> */}
                   {this.state.pairAssetInfo}
                   {this.isPairNormal() > 0 && (
                     <div className="ui-my-pairInfo" onClick={() => this.openMySwapPoolDialog()}>
                       <div></div>
-                      <div>我的做市</div>
+                      <div>{T('我的做市')}</div>
                       <div>&gt;</div>
                     </div>
                   )}
                 </Row>
               ) : (
                 <div className="ui-pairInfo">
-                  <div style={{ color: '#0C5453', fontSize: '12px', textAlign: 'center', margin: '10px 0' }}>当前资金池流动性总量</div>
+                  <div style={{ color: '#0C5453', fontSize: '12px', textAlign: 'center', margin: '10px 0' }}>{T('当前资金池流动性总量')}</div>
                   {this.state.pairAssetInfo}
                 </div>
               )}
 
               <Button className="ui-swap-submit" type="primary" onClick={() => (this.state.bLiquidOp ? this.startAddLiquidity() : this.startSwapAsset())}>
-                <font size="3">{this.state.bLiquidOp ? '添加资金池' : '兑换'}</font>
+                <font size="3">{this.state.bLiquidOp ? T('添加资金池') : T('兑换')}</font>
               </Button>
             </div>
 
             <div style={styles.lastLine}>
               <Button text style={{ color: '#00c9a7' }} onClick={() => this.showAllPairs()}>
-                所有交易对&gt;
+                <span>{T('所有交易对')} &gt;</span>
               </Button>
               <Button text style={{ color: '#00c9a7' }} onClick={() => this.showTxTable()}>
-                交易记录&gt;
+                <span>{T('交易记录')} &gt;</span>
               </Button>
               <Button text style={{ color: '#00c9a7' }} onClick={() => this.showMiningInfo()}>
-                挖矿信息&gt;
+                <span>{T('挖矿信息')} &gt;</span>
               </Button>
             </div>
           </div>
@@ -1172,7 +1178,7 @@ export default class OexSwap extends Component {
           </Card> */}
         </Row>
 
-        <UiDialog2 className="ui-SwapDetail" visible={this.state.swapPoolDialogVisible} title="资金池详情" onCancel={() => this.setState({ swapPoolDialogVisible: false })}>
+        <UiDialog2 className="ui-SwapDetail" visible={this.state.swapPoolDialogVisible} title={T('资金池详情')} onCancel={() => this.setState({ swapPoolDialogVisible: false })}>
           {this.state.pairAssetInfoData ? (
             <div className="ui-dialog-data">
               <div className="ui-SwapDetail-symbol">
@@ -1194,13 +1200,13 @@ export default class OexSwap extends Component {
               </div>
 
               <div className="ui-SwapDetail-total">
-                <div style={{ color: '#0C5453', fontSize: '12px', textAlign: 'center', margin: '10px 0' }}>流动池数量</div>
+                <div style={{ color: '#0C5453', fontSize: '12px', textAlign: 'center', margin: '10px 0' }}>{T('流动池数量')}</div>
                 {this.state.pairAssetInfo}
               </div>
 
               <div class="ui-SwapDetail-accountHeader">
-                <div>账户列表</div>
-                <div>账户数：45</div>
+                <div>{T('账户列表')}</div>
+                <div>{T('账户数：')}45</div>
               </div>
               <div className="ui-SwapDetail-account">
                 <img className="ui-before" src={PNG_ctTop} />
@@ -1220,160 +1226,6 @@ export default class OexSwap extends Component {
                       </div>
                     </div>
                   </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="ui-SwapDetail-acc">
-                    <div>
-                      <span>sadasd**sd</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="ui-primary">占比12.9%</span>
-                      <div>
-                        23434.3434 <span className="ui-primary">OEX</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1382,7 +1234,7 @@ export default class OexSwap extends Component {
           )}
         </UiDialog2>
 
-        <UiDialog2 className="ui-MySwapDetail" visible={this.state.mySwapPoolDialogVisible} title="我的资金池" onCancel={() => this.setState({ mySwapPoolDialogVisible: false })}>
+        <UiDialog2 className="ui-MySwapDetail" visible={this.state.mySwapPoolDialogVisible} title={T('我的资金池')} onCancel={() => this.setState({ mySwapPoolDialogVisible: false })}>
           {this.state.pairAssetInfoData ? (
             <div className="ui-dialog-data">
               <div className="ui-MySwapDetail-account">
@@ -1395,14 +1247,19 @@ export default class OexSwap extends Component {
                             <span>
                               {item.firstAsset.symbol.toLocaleUpperCase()} / {item.secondAsset.symbol.toLocaleUpperCase()}
                             </span>
-                            <div className="ui-primary">占比{item.myPercent}%</div>
+                            <div className="ui-primary">
+                              {T('占比')}
+                              {item.myPercent}%
+                            </div>
                           </div>
                           <div key={2}>
-                            <span className="ui-primary">{item.bigRemoveNum} 个</span>
+                            <span className="ui-primary">
+                              {item.bigRemoveNum} {T('个')}
+                            </span>
                             <div
                               onClick={() => this.outPoolDialogOpen(item)}
                               style={{ borderRadius: '10px', padding: '0 8px', backgroundColor: '#00c9a7', color: '#555', cursor: 'pointer', transform: 'transform: scale(0.9)' }}>
-                              退出流动性
+                              {T('退出流动性')}
                             </div>
                           </div>
                         </div>
@@ -1419,12 +1276,12 @@ export default class OexSwap extends Component {
           )}
         </UiDialog2>
 
-        <UiDialog3 className="ui-MySwapDetail-Body" title="退出流动性" visible={this.state.myOutPoolDialogVisible} onCancel={() => this.setState({ myOutPoolDialogVisible: false })}>
+        <UiDialog3 className="ui-MySwapDetail-Body" title={T('退出流动性')} visible={this.state.myOutPoolDialogVisible} onCancel={() => this.setState({ myOutPoolDialogVisible: false })}>
           {this.state.myOutPoolDialogData ? (
             <div className="ui-dialog-data">
               <div className="ui-MySwapDetail-BodyContent">
                 <div>
-                  <span style={{ fontSize: '12px', color: '#5E768B', fontWeight: '400' }}>流动性/个</span>
+                  <span style={{ fontSize: '12px', color: '#5E768B', fontWeight: '400' }}>{T('流动性/个')}</span>
                   <input max={this.state.bigRemoveNum} min={0} value={this.state.outPoolAmount} onChange={this.outPoolAmountChange.bind(this)}></input>
                 </div>
                 <div style={{ fontSize: '12px', color: '#5E768B', marginTop: '10px', textAlign: 'right' }}>
@@ -1436,7 +1293,7 @@ export default class OexSwap extends Component {
                   value={this.state.outPoolValue}
                   onUpdate={(newVal) => this.updateOutPoolValue(newVal)}></UiProgressControl>
                 <div className="ui-submit-danger" onClick={() => this.myOutPoolSubmit()} style={{ marginTop: '70px' }}>
-                  退出流动池
+                  {T('退出流动池')}
                 </div>
               </div>
             </div>
@@ -1453,7 +1310,7 @@ export default class OexSwap extends Component {
             <div className="ui-dialog-search">
               <Input
                 autoFocus
-                placeholder="通过资产ID/资产全名搜索资产"
+                placeholder={T('通过资产ID/资产全名搜索资产')}
                 innerBefore={<Icon type="search" size="xs" onClick={() => this.searchAsset()} />}
                 value={this.state.assetContent}
                 onChange={(v) => this.setState({ assetContent: v })}
@@ -1471,7 +1328,7 @@ export default class OexSwap extends Component {
         <Dialog
           style={{ width: '600px', padding: 0 }}
           visible={this.state.userRemovedLiquidVisible}
-          title="输入待移除的流动性数值"
+          title={T('输入待移除的流动性数值')}
           footerAlign="center"
           closeable="esc,mask,close"
           onOk={this.onInputRemovedLiquidOK.bind(this)}
@@ -1481,7 +1338,7 @@ export default class OexSwap extends Component {
             autoFocus
             placeholder={this.state.maxLiquidTip + this.state.curPairInfo.userLiquid}
             style={{ width: '100%' }}
-            innerBefore="流动性数值"
+            innerBefore={T('流动性数值')}
             value={this.state.liquidToBeRemoved}
             onChange={(v) => this.setState({ liquidToBeRemoved: v })}
             onPressEnter={() => this.onInputRemovedLiquidOK()}
@@ -1491,7 +1348,7 @@ export default class OexSwap extends Component {
         <Dialog
           style={{ width: '600px', padding: 0, color: 'white' }}
           visible={this.state.miningVisible}
-          title="挖矿信息"
+          title={T('挖矿信息')}
           footerAlign="center"
           closeable="esc,mask,close"
           onOk={() => this.setState({ miningVisible: false })}

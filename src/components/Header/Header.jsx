@@ -32,6 +32,7 @@ const { Row } = Grid;
 export const history = createHashHistory();
 const keyMap = { dashboard: '0', Block: '1', Transaction: '2', assetOperator: '3', contractDev: '4', producerList: '5' };
 const PNG_lang_en = require('./images/en.png');
+const PNG_lang_ch = require('./images/ch.png');
 
 export default class Header extends PureComponent {
   constructor(props) {
@@ -340,13 +341,20 @@ export default class Header extends PureComponent {
           <Balloon trigger={accountBtnTrigger} closable={false} style={{ color: '#5e768b' }}>
             {T('当前账号')}:{this.state.accountName == '' ? '尚未导入' : this.state.accountName}
           </Balloon>
-          {/* <Button text type="normal" style={{color: '#808080', marginLeft: '30px'}} onClick={this.onChangeLanguage.bind(this)}>{this.state.curLang}</Button> */}
           <Button text type="normal" style={{ color: '#00C9A7', marginRight: '50px' }} onClick={() => this.setState({ spreadInfoDialogVisible: true })}>
             <Iconfont icon="gift" style={{ marginRight: '8px', fontSize: '16px' }} primary></Iconfont>
-            邀请奖励
+            {T('邀请奖励')}
           </Button>
+          {/* <Button text type="normal" style={{ color: '#808080', marginLeft: '30px' }} onClick={this.onChangeLanguage.bind(this)}>
+            {this.state.curLang}
+          </Button> */}
 
-          <img src={PNG_lang_en}></img>
+          {this.state.defaultLang == null || this.state.defaultLang == 'ch' ? (
+            <img src={PNG_lang_en} style={{ position: 'relative', top: '3px', cursor: 'pointer' }} onClick={this.onChangeLanguage.bind(this)}></img>
+          ) : (
+            <img src={PNG_lang_ch} style={{ position: 'relative', top: '3px', cursor: 'pointer' }} onClick={this.onChangeLanguage.bind(this)}></img>
+          )}
+
           <UiDialog
             className="ui-nodeInfo"
             visible={this.state.nodeConfigVisible}
