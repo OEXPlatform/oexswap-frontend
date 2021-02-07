@@ -1002,7 +1002,7 @@ export default class OexSwap extends Component {
     this.setState({ myOutPoolDialogVisible: false, callbackFunc: this.removeLiquidity2, txInfoVisible: true });
   }
   removeLiquidity2 = (gasInfo, privateKey) => {
-    const { firstAsset, pairInfo } = this.state.myOutPoolDialogData;
+    const { firstAsset, pairInfo, secondAsset } = this.state.myOutPoolDialogData;
     const { outPoolAmount, contractName, accountName } = this.state;
     const liquidRemoved = '0x' + new BigNumber(outPoolAmount).shiftedBy(firstAsset.decimals - 2).toString(16);
     let actionInfo = { accountName, toAccountName: contractName, assetId: 0, amount: new BigNumber(0), remark: '' };
@@ -1010,7 +1010,7 @@ export default class OexSwap extends Component {
     oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then((txHash) => {
       this.checkReceipt(txHash, {
         txHash,
-        actionInfo: { typeId: 1, typeName: '移除流动性', accountName },
+        actionInfo: { typeId: 1, typeName: '移除流动性', accountName, inAssetInfo: { assetInfo: firstAsset, amount: outPoolAmount }, outAssetInfo: { assetInfo: secondAsset, amount: outPoolAmount } },
       });
     });
   };
@@ -1551,6 +1551,8 @@ const txInfoColume = {
       // 移除流动性
       const actionOne = record.innerActions[0].action;
       const actionTwo = record.innerActions[1].action;
+      if (!value.inAssetInfo) return null;
+      if (!value.outAssetInfo) return null;
       const assetOneInfo = value.inAssetInfo.assetInfo;
       const assetTwoInfo = value.outAssetInfo.assetInfo;
       if (assetNo == 0) {
