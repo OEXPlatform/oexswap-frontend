@@ -922,22 +922,17 @@ export default class OexSwap extends Component {
    */
   openMySwapPoolDialog() {
     const mySwapPoolDialogData = [];
-    const myPairIndexList = [...UserPairIndexList]; // 用户提供流动性数据的交易对 index 缓存
-
     // 优先加载已知的提供流动性数据
     const myPairList = this.state.pairList.filter((item) => UserPairIndexList.includes(item.index));
     const otherPairList = this.state.pairList.filter((item) => !UserPairIndexList.includes(item.index));
-    Promise.all(myPairList.map((item) => this.getUserPaire(mySwapPoolDialogData, myPairIndexList, item, true))).then(() => {
-      otherPairList.forEach((item) => this.getUserPaire(mySwapPoolDialogData, myPairIndexList, item)); // 必要数据加载完后，再判断非必要数据
+    Promise.all(myPairList.map((item) => this.getUserPaire(mySwapPoolDialogData, item, true))).then(() => {
+      otherPairList.forEach((item) => this.getUserPaire(mySwapPoolDialogData, item)); // 必要数据加载完后，再判断非必要数据
     });
-
     this.setState({ mySwapPoolDialogVisible: true });
   }
   // loadingFirst 是否在加载前就展示出占位的样式
-  async getUserPaire(mySwapPoolDialogData, myPairIndexList, pairInfo, loadingFirst = false) {
-    const render = () => {
-      this.setState({ mySwapPoolDialogData: mySwapPoolDialogData.filter((item) => item.display) });
-    };
+  async getUserPaire(mySwapPoolDialogData, pairInfo, loadingFirst = false) {
+    const render = () => this.setState({ mySwapPoolDialogData: mySwapPoolDialogData.filter((item) => item.display) });
     const data = {
       key: pairInfo.index,
       display: true, // 默认显示
@@ -948,8 +943,10 @@ export default class OexSwap extends Component {
       myPercent: 0,
       bigRemoveNum: 0,
     };
-    if (loadingFirst) mySwapPoolDialogData.push(data);
-    render();
+    if (loadingFirst) {
+      mySwapPoolDialogData.push(data);
+      render();
+    }
     const [userLiquid, totalLiquid, firstAsset, secondAsset] = await Promise.all([
       this.getUserLiquidInPair(pairInfo.index, this.state.account.accountID),
       this.getPairTotalLiquid(pairInfo.index),
