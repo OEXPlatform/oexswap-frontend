@@ -151,6 +151,7 @@ export default class OexSwap extends Component {
             if (this.state.assetInfoMap[pairInfo.firstAssetId] == null) {
               awaitList.push(
                 getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
+                  if (i === 0) console.log(pairInfo, assetInfo);
                   if (!assetInfo) return;
                   this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
                 })
@@ -159,6 +160,7 @@ export default class OexSwap extends Component {
             if (this.state.assetInfoMap[pairInfo.secondAssetId] == null) {
               awaitList.push(
                 getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
+                  if (i === 0) console.log(pairInfo, assetInfo);
                   if (!assetInfo) return;
                   this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
                 })
@@ -166,9 +168,11 @@ export default class OexSwap extends Component {
             }
             // 默认选一个
             if (i === 0 && !this.state.fromInfo.selectAssetInfo && !this.state.toInfo.selectAssetInfo) {
-              if (!this.state.assetInfoMap[pairInfo.secondAssetId]) return;
-              if (!this.state.assetInfoMap[pairInfo.firstAssetId]) return;
-              Promise.all(awaitList).then(() => this.startExchange(pairInfo));
+              Promise.all(awaitList).then(() => {
+                if (!this.state.assetInfoMap[pairInfo.firstAssetId]) return;
+                if (!this.state.assetInfoMap[pairInfo.secondAssetId]) return;
+                this.startExchange(pairInfo);
+              });
             }
           });
         }
