@@ -23,7 +23,7 @@ import { UiProgressControl } from '../../components/Ui/UiProgressControl';
 
 import { Iconfont } from '../../components/Ui/iconfont';
 import { getAssetInfoById } from '../../utils/oexSDK';
-import { updateUserPairIndexList, UserPairIndexList } from '../../utils/userPairList';
+import { popFromUserPairIndexList, pushToUserPairIndexList, updateUserPairIndexList, UserPairIndexList } from '../../utils/userPairList';
 
 const { Row, Col } = Grid;
 // const oexLogo =
@@ -935,7 +935,6 @@ export default class OexSwap extends Component {
   }
   // loadingFirst 是否在加载前就展示出占位的样式
   async getUserPaire(mySwapPoolDialogData, myPairIndexList, pairInfo, loadingFirst = false) {
-    const inIndex = myPairIndexList.indexOf(pairInfo.index);
     const render = () => {
       this.setState({ mySwapPoolDialogData: mySwapPoolDialogData.filter((item) => item.display) });
     };
@@ -959,10 +958,7 @@ export default class OexSwap extends Component {
     ]);
     if (userLiquid.isEqualTo(0) || totalLiquid.isEqualTo(0)) {
       data.display = false;
-      if (inIndex !== -1) {
-        myPairIndexList.splice(inIndex, 1); // 不在提供流动性
-        updateUserPairIndexList(myPairIndexList);
-      }
+      popFromUserPairIndexList(pairInfo.index);
       return render(); // 没有流动性提供
     }
     Object.assign(data, {
@@ -978,9 +974,7 @@ export default class OexSwap extends Component {
     });
     if (!loadingFirst) mySwapPoolDialogData.push(data);
     render();
-    if (inIndex !== -1) return; // 已经在里面了
-    myPairIndexList.push(pairInfo.index);
-    updateUserPairIndexList(myPairIndexList);
+    pushToUserPairIndexList(pairInfo.index);
   }
   // 打开退出流动性弹窗
   outPoolDialogOpen(item) {

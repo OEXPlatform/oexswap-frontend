@@ -11,3 +11,17 @@ export const updateUserPairIndexList = (newList) => {
   UserPairIndexList.splice(0, UserPairIndexList.length, ...newList);
   localStorage.setItem(localKey, JSON.stringify(UserPairIndexList));
 };
+
+export const pushToUserPairIndexList = (index) => {
+  const index = UserPairIndexList.indexOf(index);
+  if (index !== -1) return; // 已经在里面了
+  UserPairIndexList.push(index);
+  updateUserPairIndexList(UserPairIndexList);
+};
+
+export const popFromUserPairIndexList = (index) => {
+  const index = UserPairIndexList.indexOf(index);
+  if (index === -1) return; // 本就不在里面
+  UserPairIndexList.splice(index, 1);
+  updateUserPairIndexList(UserPairIndexList);
+};
