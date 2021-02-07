@@ -2,6 +2,11 @@ import * as oexchain from 'oex-web3';
 
 const getAssetInfoHandler = {};
 const AssetInfoCache = JSON.parse(localStorage.getItem('AssetInfoCache') || '{}');
+const AssetInfoCacheSave = (asset) => {
+  AssetInfoCache[res.assetId] = res.assetName;
+  AssetInfoCache[res.assetName] = res;
+  localStorage.setItem('AssetInfoCache', JSON.stringify(AssetInfoCache));
+};
 const OneDay = 24 * 60 * 60 * 1000;
 
 /**
@@ -17,10 +22,7 @@ export function getAssetInfoById(id = 0, useCache = true) {
   getAssetInfoHandler[id] = new Promise(async (resolve) => {
     try {
       const res = await oexchain.account.getAssetInfoById(id);
-      if (res) {
-        AssetInfoCache[res.assetId] = res.assetName;
-        AssetInfoCache[res.assetName] = res;
-      }
+      if (res) AssetInfoCacheSave(res);
       resolve(res);
     } catch (e) {
       resolve(null);
@@ -37,10 +39,7 @@ export function getAssetInfoByName(name = 'oextoken', useCache = true) {
   getAssetInfoHandler[name] = new Promise(async (resolve) => {
     try {
       const res = await oexchain.account.getAssetInfoByName(name);
-      if (res) {
-        AssetInfoCache[res.assetId] = res.assetName;
-        AssetInfoCache[res.assetName] = res;
-      }
+      if (res) AssetInfoCacheSave(res);
       resolve(res);
     } catch (e) {
       resolve(null);
