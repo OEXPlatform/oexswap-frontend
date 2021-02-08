@@ -9,6 +9,9 @@ const ch2en = {
   提交所有修改: 'Submit all edits',
   刷新: 'Refresh',
   取消: 'cancel',
+  '取 消': 'Cancel',
+  '确 定': 'Confirm',
+  个: 'pairs',
   普通交易所需阈值: 'Threshold for general trading',
   修改权限所需阈值: 'Threshold required to modify permissions',
   请在公链电报群中申请账号: 'Please apply for an account in the public chain telegram group.',
@@ -135,7 +138,7 @@ const ch2en = {
   手续费分配详情: 'Fee allocation details',
   内部交易信息: 'Internal transaction information',
   类型: 'Type',
-  发起账号: 'Initiate an account',
+  // 发起账号: 'Initiate an account',
   接收账号: 'Receiving account',
   金额: 'Amount',
   额外信息: 'extra information',
@@ -251,7 +254,19 @@ const ch2en = {
   类型: 'Types ',
   结果: 'Result',
   总手续费: 'Total fee',
-  发起账号: 'Initiating account',
+  发起账号: 'Account',
+  资产1: 'Asset 1',
+  资产2: 'Asset 2',
+  添加流动性: 'add liquidity',
+  移除流动性: 'quit liquidity',
+  提取挖矿奖励: 'Withdraw the mining reward ',
+  选择资产: 'Select ASSET',
+  敬请期待: 'Coming soon...',
+  选择此资产: 'Select the asset',
+  '持有账户数:': 'Accounts held：',
+  '流动性/个': 'Pairs',
+  退出流动池: 'quit',
+  '通过资产ID/资产全名搜索资产': 'Search for assets by asset ID/ asset full name',
   额外信息: 'Additional information',
   选择交易发送方: 'Select the transaction sender',
   选择需要对交易进行签名的账户: 'Select the account that needs to sign the transaction',
@@ -373,7 +388,7 @@ const ch2en = {
   '<= 可抵押票数 <=': '<= guarantable tickets <=',
   出块率: 'block rate',
   正常: 'normal',
-  兑换: 'SWAP',
+  兑换: 'swap',
   资金池: 'LIQUIDITY',
   添加资金池: 'ADD LIQUIDITY',
   '余额：': 'BALANCE：',
@@ -389,7 +404,16 @@ const ch2en = {
   挖矿信息: 'Mining info ',
   当前资金池流动性总量: 'Total liquidity of current pool',
   流动池数量: 'Liquidity',
-  // '兑换手续费：': '',
+  我的资金池: 'My liquidity',
+  占比: 'Ratio ',
+  退出流动性: 'Quit',
+  开始交易: 'TRAGE',
+  交易对: 'PAIRS',
+  当前流通量: 'CURRENT LIQUIDITY',
+  总交易量: 'TOTAL LIQUIDITY',
+  交易时间: 'Trading time',
+  交易哈希值: 'Transaction hash value',
+  操作类型: 'Operation',
   // '兑换手续费：': '',
   // '兑换手续费：': '',
   // '兑换手续费：': '',
@@ -502,10 +526,12 @@ const ch2en = {
   账号设置: 'Account',
   设置接入节点: 'Node Setting',
   '主网：': 'Mainnet:',
+  '主网1：': 'Mainnet 1:',
+  '主网2：': 'Mainnet 2:',
   '测试网1：': 'Testnnet1:',
   '测试网2：': 'Testnnet2:',
   '本地节点：': 'Local Node',
-  自定义: 'Customization',
+  // 自定义: 'Customization',
   实时数据: 'Latest Data',
   区块查询: 'Block Info',
   交易查询: 'Tx Info',
@@ -625,4 +651,10 @@ function setLang(lang) {
   }
 }
 
-export { T, setLang };
+function TUP(chStr) {
+  const res = T(chStr);
+  if (typeof res === 'string') return T(chStr).toLocaleUpperCase();
+  return res;
+}
+
+export { T, setLang, TUP };

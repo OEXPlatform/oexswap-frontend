@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog } from '@icedesign/base';
 import cx from 'classnames';
+import { T } from '../../utils/lang';
 
 export function UiDialog({ children, header, title, visible, className, onOk, onCancel, titleIcon }) {
   return (
@@ -15,10 +16,10 @@ export function UiDialog({ children, header, title, visible, className, onOk, on
           {children}
           <div className="ui-dialog-btns">
             <div className="ui-submit" onClick={onOk}>
-              确定
+              {T('确 定')}
             </div>
             <div className="ui-cancel" onClick={onCancel}>
-              取消
+              {T('取 消')}
             </div>
           </div>
         </div>

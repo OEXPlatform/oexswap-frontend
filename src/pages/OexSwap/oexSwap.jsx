@@ -12,7 +12,7 @@ import * as abiUtil from 'ethereumjs-abi';
 
 import * as utils from '../../utils/utils';
 import * as Notification from '../../utils/notification';
-import { T } from '../../utils/lang';
+import { T, TUP } from '../../utils/lang';
 import * as Constant from '../../utils/constant';
 import './style.scss';
 import './ui.scss';
@@ -34,14 +34,6 @@ const otherTokenLogo = require('./images/default-logo.png');
 const PNG_ctTop = require('./images/ct-top.png');
 const PNG_ctBottom = require('./images/ct-bottom.png');
 
-const toleranceData = [
-  { label: '0.1%', value: 1 },
-  { label: '0.2%', value: 2 },
-  { label: '1%', value: 10 },
-  { label: '2%', value: 20 },
-  { label: '自定义', value: 0 },
-];
-
 const assetData = [{ label: 'OEX', value: 0 }];
 
 export default class OexSwap extends Component {
@@ -55,8 +47,8 @@ export default class OexSwap extends Component {
       account,
       accountName: account != null ? account.accountName : '',
       txInfoList: txInfoList != null ? txInfoList : [],
-      fromInfo: { value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null },
-      toInfo: { value: '', maxValue: 0, selectAssetTip: '选择资产', selectAssetInfo: null, tmpSelectAssetInfo: null },
+      fromInfo: { value: '', maxValue: 0, selectAssetTip: T('选择资产'), selectAssetInfo: null, tmpSelectAssetInfo: null },
+      toInfo: { value: '', maxValue: 0, selectAssetTip: T('选择资产'), selectAssetInfo: null, tmpSelectAssetInfo: null },
       assetList: [],
       assetSelectorDialogVisible: false,
       swapPoolDialogVisible: false,
@@ -99,6 +91,14 @@ export default class OexSwap extends Component {
       miningVisible: false,
       miningInfo: { curMiningOEX: 0, myHavestOEX: 0, miningSettings: [] },
       assetInfoMap: {},
+
+      toleranceData: [
+        { label: '0.1%', value: 1 },
+        { label: '0.2%', value: 2 },
+        { label: '1%', value: 10 },
+        { label: '2%', value: 20 },
+        { label: T('自定义'), value: 0 },
+      ],
     };
   }
 
@@ -565,7 +565,9 @@ export default class OexSwap extends Component {
       }
       return (
         <div key={assetInfo.symbol} className={classNames.join(' ')} style={{ cursor: needBtn ? 'pointer' : 'default' }} onClick={() => needBtn && this.clickAsset(assetInfo)}>
-          <font className="ui-assetInfo-account">持有账户数: {assetInfo.stats}</font>
+          <font className="ui-assetInfo-account">
+            {T('持有账户数:')} {assetInfo.stats}
+          </font>
           <img src={assetInfo.assetid == 0 ? oexTokenLogo : otherTokenLogo} />
           <div className="ui-assetInfo-symbol">
             {symbol}
@@ -574,7 +576,7 @@ export default class OexSwap extends Component {
           <span>{assetInfo.assetName}</span>
           {needBtn ? (
             <div className="ui-btn" onClick={() => this.clickAsset(assetInfo)}>
-              选择此资产
+              {T('选择此资产').toLocaleUpperCase()}
             </div>
           ) : (
             ''
@@ -793,7 +795,7 @@ export default class OexSwap extends Component {
   };
 
   showMiningInfo = () => {
-    Notification.displayNotice('敬请期待');
+    Notification.displayNotice(T('敬请期待'));
     // this.getMiningOEXPerBlock();
     // this.getMyHavestOEX();
     // this.getMiningSettings();
@@ -884,7 +886,7 @@ export default class OexSwap extends Component {
   startEX = (value, index, pairInfo) => {
     return (
       <Button className="ui-button" type="primary" onClick={() => this.startExchange(pairInfo)}>
-        开始交易
+        {T('开始交易')}
       </Button>
     );
   };
@@ -1041,10 +1043,10 @@ export default class OexSwap extends Component {
             <div style={styles.card1}>
               <div className="ui-swap-tab">
                 <div className={cx({ 'ui-select': !this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(false)}>
-                  {T('兑换')}
+                  {T('兑换').toLocaleUpperCase()}
                 </div>
                 <div className={cx({ 'ui-select': this.state.bLiquidOp })} onClick={() => this.changeLiquidityOp(true)}>
-                  {T('资金池')}
+                  {T('资金池').toLocaleUpperCase()}
                 </div>
               </div>
               <div className="ui-card2">
@@ -1112,7 +1114,7 @@ export default class OexSwap extends Component {
                 )}
                 <Select
                   popupClassName="ui-swap-tolerance-select-popup"
-                  dataSource={toleranceData}
+                  dataSource={this.state.toleranceData}
                   defaultValue={this.state.selectedTolerance}
                   className="ui-swap-tolerance-select"
                   onChange={(v) => this.changeTolerance(v)}
@@ -1154,7 +1156,7 @@ export default class OexSwap extends Component {
               )}
 
               <Button className="ui-swap-submit" type="primary" onClick={() => (this.state.bLiquidOp ? this.startAddLiquidity() : this.startSwapAsset())}>
-                <font size="3">{this.state.bLiquidOp ? T('添加资金池') : T('兑换')}</font>
+                <font size="3">{this.state.bLiquidOp ? T('添加资金池').toLocaleUpperCase() : T('兑换').toLocaleUpperCase()}</font>
               </Button>
             </div>
 
@@ -1281,7 +1283,7 @@ export default class OexSwap extends Component {
             <div className="ui-dialog-data">
               <div className="ui-MySwapDetail-BodyContent">
                 <div>
-                  <span style={{ fontSize: '12px', color: '#5E768B', fontWeight: '400' }}>{T('流动性/个')}</span>
+                  <span style={{ fontSize: '12px', color: '#5E768B', fontWeight: '400' }}>{T('流动性/个').toLocaleUpperCase()}</span>
                   <input max={this.state.bigRemoveNum} min={0} value={this.state.outPoolAmount} onChange={this.outPoolAmountChange.bind(this)}></input>
                 </div>
                 <div style={{ fontSize: '12px', color: '#5E768B', marginTop: '10px', textAlign: 'right' }}>
@@ -1293,7 +1295,7 @@ export default class OexSwap extends Component {
                   value={this.state.outPoolValue}
                   onUpdate={(newVal) => this.updateOutPoolValue(newVal)}></UiProgressControl>
                 <div className="ui-submit-danger" onClick={() => this.myOutPoolSubmit()} style={{ marginTop: '70px' }}>
-                  {T('退出流动池')}
+                  {T('退出流动池').toLocaleUpperCase()}
                 </div>
               </div>
             </div>
@@ -1305,7 +1307,7 @@ export default class OexSwap extends Component {
         <UiDialog
           className="ui-SelectAsset"
           visible={this.state.assetSelectorDialogVisible}
-          title={[<Iconfont key={2} icon="asset" primary></Iconfont>, T('选择资产')]}
+          title={[<Iconfont key={2} icon="asset" primary></Iconfont>, T('选择资产').toLocaleUpperCase()]}
           header={
             <div className="ui-dialog-search">
               <Input
@@ -1433,7 +1435,7 @@ export default class OexSwap extends Component {
               <Table.Column title={T('交易时间')} dataIndex="time" width={144} cell={txInfoColume.time} />
               <Table.Column title={T('交易哈希值')} dataIndex="txHash" width={200} cell={txInfoColume.txHash} />
               <Table.Column title={T('发起账号')} dataIndex="actionInfo" width={140} cell={txInfoColume.accountName} />
-              <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={140} cell={txInfoColume.typeName} />
+              <Table.Column title={T('操作类型')} dataIndex="actionInfo" width={140} cell={TUP(txInfoColume.typeName)} />
               <Table.Column title={T('状态')} dataIndex="status" width={110} cell={txInfoColume.status} />
               <Table.Column title={T('资产1')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 0)} />
               <Table.Column title={T('资产2')} dataIndex="actionInfo" width={110} cell={txInfoColume.processAssetInfo.bind(this, 1)} />
@@ -1537,8 +1539,8 @@ const txInfoColume = {
     </a>
   ),
   accountName: (info) => <span style={{ color: '#141426', fontSize: '12px' }}>{info.accountName}</span>,
-  typeName: (info) => <span style={{ color: '#141426', fontSize: '12px' }}>{info.typeName}</span>,
-  status: (v) => (v == 0 ? <span style={{ color: '#FF5F6D', fontSize: '12px' }}>失败</span> : <span style={{ color: '#00C9A7', fontSize: '12px' }}>成功</span>),
+  typeName: (info) => <span style={{ color: '#141426', fontSize: '12px' }}>{T(info.typeName).toLocaleUpperCase()}</span>,
+  status: (v) => (v == 0 ? <span style={{ color: '#FF5F6D', fontSize: '12px' }}>{T('失败')}</span> : <span style={{ color: '#00C9A7', fontSize: '12px' }}>{T('成功')}</span>),
   processAssetInfo: (assetNo, value, index, record) => {
     if (record.status == 0) return <span style={{ fontSize: '12px' }}>-</span>;
     if (value.typeId == 0) {
