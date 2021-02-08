@@ -3,7 +3,6 @@ const path = require('path');
 const crypto = require('crypto');
 const OSS = require('ali-oss');
 const aes = require('aes-cross');
-const SDK = require('ali-cdn-sdk');
 
 const uploadList = []; // 文件上传列表
 
