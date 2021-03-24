@@ -19,11 +19,14 @@ import './ui.scss';
 import { UiDialog } from '../../components/Ui/UiDialog';
 import { UiDialog2 } from '../../components/Ui/UiDialog2';
 import { UiDialog3 } from '../../components/Ui/UiDialog3';
+import { UiDialog4 } from '../../components/Ui/UiDialog4';
 import { UiProgressControl } from '../../components/Ui/UiProgressControl';
 
 import { Iconfont } from '../../components/Ui/iconfont';
+import MinerInfo from '../../components/MinerInfo';
 import { getAssetInfoById } from '../../utils/oexSDK';
 import { popFromUserPairIndexList, pushToUserPairIndexList, updateUserPairIndexList, UserPairIndexList } from '../../utils/userPairList';
+import eventProxy from '../../utils/eventProxy';
 
 const { Row, Col } = Grid;
 // const oexLogo =
@@ -54,6 +57,8 @@ export default class OexSwap extends Component {
       swapPoolDialogVisible: false,
       swapPoolDialogData: null,
 
+      minerInfoDialogVisible: false,
+
       mySwapPoolDialogVisible: false,
       mySwapPoolDialogData: [],
       myOutPoolDialogVisible: false,
@@ -68,8 +73,8 @@ export default class OexSwap extends Component {
       pairMap: {},
       feeRate: 0,
       curPairInfo: { myPercent: 0 },
-      contractName: 'oexswaptest011',
-      minerContractName: 'oexminertest016',
+      contractName: 'oexswaptest012',
+      minerContractName: 'oexminertest034',
       liquidToBeRemoved: '',
       maxLiquidTip: '最多可移除的流动性数量:',
       txInfoVisible: false,
@@ -92,6 +97,8 @@ export default class OexSwap extends Component {
       miningInfo: { curMiningOEX: 0, myHavestOEX: 0, miningSettings: [] },
       assetInfoMap: {},
 
+      timer: null,
+
       toleranceData: [
         { label: '0.1%', value: 1 },
         { label: '0.2%', value: 2 },
@@ -103,6 +110,9 @@ export default class OexSwap extends Component {
   }
 
   componentDidMount = async () => {
+    eventProxy.on('showMiningInfo', () => {
+      this.showMiningInfo();
+    });
     fetch('https://api.oexchain.com/api/rpc/gettokens?pageIndex=0&pageSize=20&stats=10')
       .then((response) => {
         return response.json();
@@ -130,7 +140,19 @@ export default class OexSwap extends Component {
     oexchain.oex.getSuggestionGasPrice().then((gasPrice) => {
       this.setState({ suggestionPrice: utils.getReadableNumber(gasPrice, 9, 9) });
     });
+    this.state.timer = setInterval(this.updatePool.bind(this), 5000);
   };
+  componentWillUnmount() {
+    clearInterval(this.state.timer);
+  }
+
+  // 每隔 5秒更新一次数据
+  updatePool() {
+    if (!this.state.fromInfo) return;
+    if (!this.state.toInfo) return;
+    this.updateBaseInfo(this.state.fromInfo, this.state.toInfo);
+    this.updateToValue();
+  }
 
   getAllPair = () => {
     const _this = this;
@@ -507,7 +529,7 @@ export default class OexSwap extends Component {
 
   setPairAssetInfo(firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo) {
     this.setState({
-      pairAssetInfoData: { firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo },
+      pairAssetInfoData: JSON.parse(JSON.stringify({ firstAssetAmount, firstAssetInfo, secondAssetAmount, secondAssetInfo })),
       pairAssetInfo: (
         <div className="ui-pairInfo-num">
           <div className="ui-pairInfo-first ui-ell ui-clearfix" title={firstAssetAmount}>
@@ -656,11 +678,13 @@ export default class OexSwap extends Component {
   inputMaxFromAmount = () => {
     this.state.fromInfo.value = this.state.fromInfo.maxValue;
     this.setState({ fromInfo: this.state.fromInfo });
+    this.updateToValue(); // 更新
   };
 
   inputMaxToAmount = () => {
     this.state.toInfo.value = this.state.toInfo.maxValue;
     this.setState({ toInfo: this.state.toInfo });
+    this.updateToValue(); // 更新
   };
 
   swapFromAndTo = () => {
@@ -795,7 +819,8 @@ export default class OexSwap extends Component {
   };
 
   showMiningInfo = () => {
-    Notification.displayNotice(T('敬请期待'));
+    this.setState({ minerInfoDialogVisible: true });
+    // Notification.displayNotice(T('敬请期待'));
     // this.getMiningOEXPerBlock();
     // this.getMyHavestOEX();
     // this.getMiningSettings();
@@ -1326,6 +1351,15 @@ export default class OexSwap extends Component {
             {this.state.assetDisplayList.map((assetInfo) => assetInfo)}
           </Row>
         </UiDialog>
+
+        <UiDialog4
+          className="ui-MinerInfo"
+          visible={this.state.minerInfoDialogVisible}
+          title={[<Iconfont key={2} icon="wa" primary></Iconfont>, T('挖矿信息').toLocaleUpperCase()]}
+          onOk={() => this.setState({ minerInfoDialogVisible: false })}
+          onCancel={() => this.setState({ minerInfoDialogVisible: false })}>
+          <MinerInfo></MinerInfo>
+        </UiDialog4>
 
         <Dialog
           style={{ width: '600px', padding: 0 }}

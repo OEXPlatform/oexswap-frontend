@@ -26,6 +26,9 @@ import BigNumber from 'bignumber.js';
 import './scss/ui.scss';
 import { Iconfont } from '../Ui/iconfont';
 import { UiDialog } from '../Ui/UiDialog';
+import HireMiner from '../../components/HireMiner';
+import SwapMiner from '../../components/SwapMiner';
+import { UiDialog4 } from '../../components/Ui/UiDialog4';
 
 // import { BigNumber } from 'ethers/utils';
 const { Row } = Grid;
@@ -59,6 +62,10 @@ export default class Header extends PureComponent {
       nodeConfigVisible: false,
       accountConfigVisible: false,
       spreadInfoDialogVisible: false,
+
+      swapMinerDialogVisible: false,
+      hireMinerDialogVisible: false,
+
       account: account,
       accountName: account != null ? account.accountName : '',
       privateKey: '',
@@ -274,9 +281,13 @@ export default class Header extends PureComponent {
     Feedback.toast.success(T('已复制到粘贴板'));
   };
 
+  showMiningInfo() {
+    eventProxy.trigger('showMiningInfo');
+  }
+
   render() {
     const defaultTrigger = (
-      <Button text type="normal" style={{ color: '#808080', marginRight: '100px' }} onClick={this.openSetDialog.bind(this)}>
+      <Button text type="normal" style={{ color: '#808080', marginRight: '30px' }} onClick={this.openSetDialog.bind(this)}>
         <Iconfont style={{ marginRight: '8px', fontSize: '16px' }} icon="node" primary />
         {T('设置接入节点')}
       </Button>
@@ -335,6 +346,16 @@ export default class Header extends PureComponent {
         </div> */}
 
         <div className="ui-layout-header-menu">
+          <div className="ui-header-btn" style={{ marginRight: '30px' }} onClick={() => this.showMiningInfo()}>
+            <Iconfont icon="wa"></Iconfont>
+            <span>交易挖矿</span>
+            <Iconfont icon="hot"></Iconfont>
+          </div>
+          <div className="ui-header-btn" style={{ marginRight: '114px' }} onClick={() => this.showMiningInfo()}>
+            <Iconfont icon="wa"></Iconfont>
+            <span>雇佣挖矿</span>
+            <Iconfont icon="hot"></Iconfont>
+          </div>
           <Balloon trigger={defaultTrigger} closable={false} style={{ color: '#5e768b' }}>
             {T('当前连接的节点')}:{this.state.nodeInfo}, ChainId:{this.state.chainId}
           </Balloon>
@@ -354,6 +375,23 @@ export default class Header extends PureComponent {
           ) : (
             <img src={PNG_lang_ch} style={{ position: 'relative', top: '3px', cursor: 'pointer' }} onClick={this.onChangeLanguage.bind(this)}></img>
           )}
+
+          <UiDialog4
+            className="ui-SwapMiner"
+            visible={this.state.swapMinerDialogVisible}
+            title={[<Iconfont key={2} icon="wa" primary></Iconfont>, T('交易挖矿').toLocaleUpperCase()]}
+            onOk={() => this.setState({ swapMinerDialogVisible: false })}
+            onCancel={() => this.setState({ swapMinerDialogVisible: false })}>
+            <SwapMiner></SwapMiner>
+          </UiDialog4>
+          <UiDialog4
+            className="ui-HireMiner"
+            visible={this.state.hireMinerDialogVisible}
+            title={[<Iconfont key={2} icon="wa" primary></Iconfont>, T('雇佣挖矿').toLocaleUpperCase()]}
+            onOk={() => this.setState({ hireMinerDialogVisible: false })}
+            onCancel={() => this.setState({ hireMinerDialogVisible: false })}>
+            <HireMiner></HireMiner>
+          </UiDialog4>
 
           <UiDialog
             className="ui-nodeInfo"

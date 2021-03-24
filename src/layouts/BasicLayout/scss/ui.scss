@@ -282,6 +282,124 @@ svg path:nth-child(1) {
   }
 }
 
+.ui-dialog4 {
+  position: fixed !important;
+  top: 60px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: calc(100vh - 60px) !important;
+  background-color: #f2f3f4;
+  .next-dialog-close {
+    display: none;
+  }
+  .ui-out {
+    position: absolute;
+    font-size: 24px;
+    right: 26px;
+    top: 26px;
+    cursor: pointer;
+  }
+
+  // 弹窗内容
+  .ui-dialog-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 100px;
+    margin: auto;
+    height: calc(100% - 172px);
+    .ui-dialog-body {
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+      border-radius: 20px;
+      padding-bottom: 26px;
+      height: 100%;
+
+      .ui-dialog-header {
+        height: 80px;
+        overflow: hidden;
+        line-height: 80px;
+        position: relative;
+        // border-bottom: 1px solid #c9cace;
+        z-index: 3;
+        padding-left: 30px;
+        box-shadow: none;
+
+        .ui-dialog-title {
+          svg {
+            margin-right: 18px;
+            color: #00c9a7;
+            font-size: 24px;
+            position: relative;
+            top: 3px;
+          }
+          font-size: 16px;
+          font-weight: 600;
+          color: #1f2340;
+        }
+      }
+
+      .ui-dialog-data {
+        height: 520px;
+        background-color: #fff;
+        overflow: auto;
+        &::-webkit-scrollbar {
+          height: 0;
+          width: 0;
+          background: transparent;
+        }
+        &::-webkit-scrollbar-thumb {
+          width: 0;
+          min-height: 15px;
+          background: transparent;
+        }
+        &::-webkit-scrollbar-thumb:active,
+        &::-webkit-scrollbar-thumb:hover {
+          background: transparent;
+        }
+      }
+    }
+  }
+  // 弹窗按钮
+  .ui-dialog-btns {
+    box-shadow: 0px -3px 6px rgba(0, 0, 0, 0.16);
+    border-radius: 0px 0px 20px 20px;
+    height: 94px;
+    position: absolute;
+    z-index: 3;
+    text-align: center;
+    padding-top: 30px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    .ui-submit,
+    .ui-cancel {
+      width: 120px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      border-radius: 50px;
+      font-size: 16px;
+      display: inline-block;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .ui-submit {
+      background-color: #00c9a7;
+      color: #fff;
+      box-shadow: 0 1px 6px 1px rgba(#aaa, 0.8);
+    }
+    .ui-cancel {
+      margin-left: 40px;
+      color: #999;
+      background-color: #fff;
+      box-shadow: 0 1px 6px 1px rgba(#aaa, 0.8);
+    }
+  }
+}
+
 .ui-SwapDetail {
   width: 394px;
   .ui-SwapDetail-symbol {
@@ -528,6 +646,14 @@ svg path:nth-child(1) {
     }
   }
 }
+.ui-MinerInfo,
+.ui-SwapMiner,
+.ui-HireMiner {
+  width: 810px;
+  .ui-dialog-body {
+    width: 810px;
+  }
+}
 .ui-assetInfo {
   height: 226px;
   width: 270px;
@@ -720,6 +846,12 @@ svg path:nth-child(1) {
   height: 0;
   clear: both;
   visibility: hidden;
+}
+.ui-fl {
+  float: left;
+}
+.ui-fr {
+  float: right;
 }
 
 .ui-ProgressControl {
