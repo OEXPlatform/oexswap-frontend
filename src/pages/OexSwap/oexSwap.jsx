@@ -153,6 +153,7 @@ export default class OexSwap extends Component {
     if (!this.state.toInfo) return;
     this.updateBaseInfo(this.state.fromInfo, this.state.toInfo);
     this.updateToValue();
+    this.updateUserInfo();
   }
 
   getAllPair = async () => {
@@ -472,6 +473,20 @@ export default class OexSwap extends Component {
   assetRender = (item) => {
     return item.assetName + '(' + item.symbol + ')';
   };
+
+  // 每隔5秒更新用户资产信息
+  async updateUserInfo() {
+    const account = await oexchain.account.getAccountByName(this.state.accountName);
+    const { fromInfo, toInfo } = this.state;
+    const infos = [fromInfo, toInfo];
+    infos.forEach((info) => {
+      if (!info.selectAssetInfo) return;
+      const balanceInfo = account.balances.find((v) => v.assetID == info.selectAssetInfo.assetid);
+      const amount = balanceInfo ? new BigNumber(balanceInfo.balance).shiftedBy(info.selectAssetInfo.decimals * -1).toFixed(info.selectAssetInfo.decimals) : 0;
+      info.maxValue = amount;
+    });
+    this.setState({ fromInfo, toInfo, account });
+  }
 
   onSelectAssetOK = async () => {
     const { fromInfo, toInfo, account, isFromAsset } = this.state;
