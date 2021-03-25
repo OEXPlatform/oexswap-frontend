@@ -6,6 +6,7 @@ import { createBrowserHistory } from 'history';
 import axios from 'axios';
 import { Feedback } from '@icedesign/base';
 import * as oexchain from 'oex-web3';
+import './data/app';
 
 // 载入默认全局样式 normalize 、.clearfix 和一些 mixin 方法等
 import '@icedesign/base/reset.scss';

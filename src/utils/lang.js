@@ -1,4 +1,31 @@
 const ch2en = {
+  'OEXSWAP 交易挖矿产出计划': 'Output Plan of OEXSWAP Trading Mining',
+  'OEXSWAP 交易挖矿参与细则': 'Rules for Participation in OEXSWAP Trading Mining',
+  'OEXSWAP 雇佣挖矿参与细则': 'Rules for Participation in OEXSWAP Hired Mining',
+  miningText1:
+    'Only when the number of account addresses held in the chain of token is ≥100 can a trading pair containing the token be created. For example, if there are 100 chain accounts holding AA token, AA/OEX trading pairs can be successfully created; There are only 99 chain accounts holding BB token, so BB/OEX trading pair cannot be created.',
+  miningTtile2: 'The initial output of each block in OEXSWAP Trading Mining are 10 OEX tokens, which is halved for three times every 90 days, and 2,592,000 blocks are produced in each cycle.',
+  miningTtile3: 'Cycle 1: From block height 4,978,888, each block will produce 10 OEX tokens, and it is planned to produce 25,920,000 OEX tokens.',
+  miningTtile4: 'Cycle 2: From the block height 7,570,888, each block will produce 5 OEX tokens, and it is planned to produce 12,960,000 OEX tokens.',
+  miningTtile5: 'Cycle 3: From the block height 10,162,888, each block will produce 2.5 OEX tokens, and it is planned to produce 6,480,000 OEX tokens.',
+  miningTtile6: 'Cycle 4: From the block height 12,754,888, each block will produce 1.25 OEX tokens, and it is planned to produce 3,240,000 OEX tokens.',
+  miningTtile7: 'OEXSWAP Trading Mining will last 360 days, and it is planned to produce 48,600,000 OEX tokens.',
+  miningTtile8:
+    '1,The trading pairs involved in Trading Mining must take OEX tokens as the anchor. For example, AA/OEX trading pairs composed of AA token and OEX token can participate in Trading Mining; The AA/BB trading pair composed of AA token and BB token cannot participate in Trading Mining.',
+  miningTtile9:
+    '2,Only when the trading account number of the trading pair is ≥10 can the Trading Mining be started. For example, if there are 10 accounts that trade AA with OEX, AA/OEX tradings will automatically participate in the Trading Mining; Only 9 accounts have traded BB with OEX, so BB/OEX trading pair cannot participate in Trading Mining. ',
+  miningTtile10:
+    '3,Each account number divides the OEX tokens output of each block according to its trading volume proportion, and the statistical unit of trading volume is OEX token. For example, if the total trading volume of OEXSWAP in a block are 10,000 OEX tokens and the trading volume of account A are 100 OEX tokens, account A can get 1% of the OEX tokens produced by the block, that are, 0.1 OEX tokens. ',
+  miningTtile11:
+    '4,The contract account of the OEXSWAP Trading Mining bonus pool is oexswapmierv01, and the initial bonus is 48600000 oex. When the block height reaches 15346888, the Trading Mining activities will automatically end. And all oex in the Trading Mining bonus pool will be transferred out from the oexliquidity account without additional issuance.',
+  miningTtile12:
+    "In addition, Hired Mining is launched, which means that you can get additional OEX rewards by hiring others to register through the hiring link. Hired Mining is divided into first-level Hired Mining (directly hired by this account) and second-level Hired Mining (indirectly hired by the account hired by this account). For the first-level hire, the employer can get 20% of the OEX of the first-level employee's transaction and mining as a hired rewards. And for the second-level hire, the employer can get the 10% OEX of the second-level employee's transaction and mining as the hired rewards. The Trading Mining rewards received by the hired will not be reduced, and the hired rewards come from the two level ",
+  miningTtile13:
+    ' "Hired Mining bonus pool". "The Level 1 Hired Mining Bonus Pool" is initially 9,720,000 OEX and "The Level 2 Hired Mining Bonus Pool" is initially 4,860,000 OEX. The contract account is swapspredv01. All OEX in the two level Hired Mining Bonus Pools are from the oexliquidity account without additional issuance.',
+  miningTtile14:
+    'For example, if A hires B to participate in Trading Mining, account A can not only get the rewards due to its own Trading Mining, but also get an additional 20% of the Trading Mining rewards of account B as its first-level Hired Mining rewards. The rewards for Trading Mining of account B remain unchanged, and the rewards for account A are paid out of the',
+  miningTtile15:
+    ' "first-level Hired Mining bonus pool". If B employs C after that, account B can receive an additional 20% of the Trading Mining rewards of account C as its first-level Hired Mining rewards, and account A can receive an additional 10% of the Trading Mining rewards of account C as its second-level mining rewards. The rewards obtained by accounts A and B are respectively paid from the two-level "Hired Mining bonus pool".',
   输入其它公钥: 'Enter another public key',
   资产: 'assets',
   合约: 'contract',
@@ -11,6 +38,8 @@ const ch2en = {
   取消: 'cancel',
   '取 消': 'Cancel',
   '确 定': 'Confirm',
+  推广信息: 'Promotional information',
+  您的推广链接: 'Your promotion link',
   个: 'pairs',
   普通交易所需阈值: 'Threshold for general trading',
   修改权限所需阈值: 'Threshold required to modify permissions',
@@ -259,7 +288,17 @@ const ch2en = {
   资产2: 'Asset 2',
   添加流动性: 'add liquidity',
   移除流动性: 'quit liquidity',
-  提取挖矿奖励: 'Withdraw the mining reward ',
+  当前周期: 'Current Epoch',
+  当前区块高度: 'Current block height',
+  当前区块奖励: 'Current block reward',
+  我的挖矿奖励: 'My mining reward',
+  一级邀请: 'Level 1 invitation',
+  二级邀请: 'Level 2 invitation',
+  '一、二级雇佣奖励': 'Total Employment Reward',
+  提取奖励: 'Withdrawal reward',
+  复制邀请链接: 'Copy invitation link',
+  提取挖矿奖励: 'Withdraw the mining reward',
+  'OEXSWAP 交易对创建规则': 'Rules for Creating OEXSWAP Trading Pairs',
   选择资产: 'Select ASSET',
   敬请期待: 'Coming soon...',
   选择此资产: 'Select the asset',
@@ -629,16 +668,35 @@ const ch2en = {
   下载合约: 'Download Contract',
   编译合约: 'Compile Contract',
 };
-
+const cnConf = {
+  miningText1: 'token的链上持有账户地址数≥100方可创建包含该token的交易对。例如，持有AA token的链上账户有100个，则可成功创建AA/OEX交易对；持有BB token的链上账户只有99个，则无法创建BB/OEX交易对。',
+  miningTtile2: 'OEXSWAP 交易挖矿每个区块初始产出10个OEX，每90天为一个减半周期，共减半三次，每个周期出2,592,000个块。',
+  miningTtile3: '周期1：从区块高度4,978,888开始，每个区块产出10个OEX，计划产出25,920,000个OEX。',
+  miningTtile4: '周期2：从区块高度7,570,888开始，每个区块产出5个OEX，计划产出12,960,000个OEX。',
+  miningTtile5: '周期3：从区块高度10,162,888开始，每个区块产出2.5个OEX，计划产出6,480,000个OEX。',
+  miningTtile6: '周期4：从区块高度12,754,888开始，每个区块产出1.25个OEX，计划产出3,240,000个OEX。',
+  miningTtile7: '交易挖矿持续时间360天，计划产出48,600,000个OEX。',
+  miningTtile8: '1.参与交易挖矿的交易对必须以OEX为锚。例如，AA token与OEX token组成的AA/OEX交易对可参与交易挖矿；而AA token与BB token组成的AA/BB交易对无法参与交易挖矿。',
+  miningTtile9: '2.该交易对的交易账号数≥10方能启动交易挖矿。例如，有10个账户用OEX交易了AA，则AA/OEX交易对自动参与交易挖矿；只有9个账户用OEX交易了BB，则BB/OEX交易对无法参与交易挖矿。',
+  miningTtile10:
+    '3.每个账号按其交易量占比瓜分每个区块产出的OEX，交易量统计单位为OEX。例如，某区块产出的时间段内OEXSWAP总交易量为10,000个OEX，A账户交易量为100个OEX，则A账户可分得该区块产出的OEX的1%，即可分得0.1个OEX。',
+  miningTtile11:
+    '4.交易挖矿奖金池合约账户为oexswapmierv01，奖金初始为48,600,000个OEX，达到区块高度15,346,888时交易挖矿活动自动结束，交易挖矿奖金池中所有OEX从oexliquidity账户（OEX流动性账户）转出，不额外增发。',
+  miningTtile12:
+    '此外，再推出雇佣挖矿，即通过雇佣链接雇佣他人注册可额外获得OEX奖励。雇佣挖矿分为一级雇佣挖矿（本账户直接雇佣）和二级雇佣挖矿（本账户雇佣的账户所间接雇佣）。一级雇佣，雇佣者可获得一级被雇佣者交易挖矿的20%的OEX作为雇佣奖励；二级雇佣，雇佣者可获得二级被雇佣者交易挖矿的10%的OEX作为雇佣奖励。注意，被雇佣者所获交易挖矿奖励不会减少，雇佣奖励来自',
+  miningTtile13:
+    '“雇佣挖矿奖金池”，其中“一级雇佣挖矿奖金池”初始为9,720,000个OEX；“二级雇佣挖矿奖金池”初始为4,860,000个OEX，合约账户为swapspreadv01。雇佣挖矿奖金池中所有OEX从oexliquidity账户（OEX流动性账户）转出，不额外增发。',
+  miningTtile14:
+    '例如，A雇佣B参与交易挖矿，A账户除了可以获得自己交易挖矿应得的奖励，还可以额外获得B账户交易挖矿奖励的20%作为其一级雇佣挖矿奖励，且B账户所获交易挖矿奖励不变，A账户所获奖励从“一级雇佣挖矿奖金池”中支出。如果B又雇佣了C，则B账户可额外获得C账户交易挖矿奖励的20%作为其一级雇佣挖矿奖励，且A账户可额外获得C账户交易挖矿奖励的10%作为其二级雇佣挖矿奖励，A、B账户所获奖励分别从两级“雇佣挖矿奖金池”中支出。',
+};
 let isCh = true;
 
 function T(chStr) {
   if (isCh) {
+    if (cnConf[chStr]) return cnConf[chStr];
     return chStr;
   }
-  if (ch2en[chStr] != null) {
-    return ch2en[chStr];
-  }
+  if (ch2en[chStr] != null) return ch2en[chStr];
   console.log('no en:' + chStr);
   return chStr;
 }

@@ -37,6 +37,9 @@
       background-size: inherit;
       background-repeat: no-repeat;
       background-position: 36px 15px;
+      h4 {
+        margin-top: 80px;
+      }
     }
   }
   .ui-miner-right {
@@ -54,6 +57,9 @@
         cursor: pointer;
       }
     }
+    .ui-detail-info {
+      display: none;
+    }
   }
   .ui-miner-block {
     height: 220px;
@@ -64,7 +70,7 @@
     // transition: all linear 0.4s;
     padding: 20px;
     h4 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
       line-height: 28px;
       color: #ffffff;
@@ -110,6 +116,9 @@
       .ui-fr {
         width: 200px;
         background-position: 51px 15px;
+        h4 {
+          margin-top: 44px;
+        }
       }
     }
     .ui-miner-right {
@@ -118,9 +127,103 @@
         width: 560px;
         height: 422px;
       }
+      .ui-fr {
+        width: 100%;
+      }
+      .ui-detail-info {
+        display: block;
+      }
     }
     .ui-miner-block {
       height: 206px;
+    }
+    .ui-detail-info {
+      position: absolute;
+      left: 205px;
+      border-left: 1px solid #428c76;
+      height: 360px;
+      width: 334px;
+      top: 32px;
+      overflow: auto;
+      > div {
+        width: 285px;
+        height: 60px;
+        background: rgba(#141426, 0.5);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        margin-left: 48px;
+        position: relative;
+        .ui-speard-detail-id {
+          width: 150px;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 20px;
+          color: #ffffff;
+          position: absolute;
+          left: 65px;
+          top: 6px;
+          word-break: break-all;
+        }
+        .ui-speard-detail-reward {
+          height: 20px;
+          font-size: 16px;
+          font-weight: bold;
+          line-height: 20px;
+          color: #91ffe9;
+          position: absolute;
+          bottom: 6px;
+          right: 6px;
+          span {
+            font-size: 12px;
+          }
+        }
+        .ui-speard-detail-deep {
+          width: 100px;
+          height: 32px;
+          line-height: 32px;
+          background: #0c5453;
+          border: 1px solid #affcea;
+          border-radius: 20px;
+          font-size: 18px;
+          color: #23c9a7;
+          position: absolute;
+          top: 0;
+          right: -16px;
+          transform: scale(0.5);
+          text-align: center;
+          &[deep='2'] {
+            background: #23c9a7;
+            border-color: #23c9a7;
+            color: #fff;
+          }
+        }
+        img {
+          width: 48px;
+          height: 48px;
+          margin: 6px;
+        }
+      }
+      .ui-load-more {
+        text-align: center;
+        line-height: 60px;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      &::-webkit-scrollbar {
+        height: 0;
+        width: 0;
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        width: 0;
+        min-height: 15px;
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb:active,
+      &::-webkit-scrollbar-thumb:hover {
+        background: transparent;
+      }
     }
   }
 }

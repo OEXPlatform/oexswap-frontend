@@ -3,7 +3,7 @@ import pathToRegexp from 'path-to-regexp';
 
 import BigNumber from 'bignumber.js';
 import EthCrypto from 'eth-crypto';
-import {AbiCoder as EthersAbiCoder} from 'ethers/utils/abi-coder';
+import { AbiCoder as EthersAbiCoder } from 'ethers/utils/abi-coder';
 import * as oexchain from 'oex-web3';
 import * as ethUtil from 'ethereumjs-util';
 import { decode } from 'rlp';
@@ -25,11 +25,7 @@ function formatterMenuData(menuData, parentPath = '', parentAuthority) {
       authority: item.authority || parentAuthority,
     };
     if (item.children) {
-      result.children = formatterMenuData(
-        item.children,
-        `${parentPath}${item.path}`,
-        item.authority
-      );
+      result.children = formatterMenuData(item.children, `${parentPath}${item.path}`, item.authority);
     }
     return result;
   });
@@ -72,9 +68,7 @@ function getRouterData(routerConfig, menuConfig) {
     // 匹配菜单中的路由，当路由的 path 能在 menuData 中找到匹配（即菜单项对应的路由），则获取菜单项中当前 path 的配置 menuItem
     // eg.  router /product/:id === /product/123
     const pathRegexp = pathToRegexp(item.path);
-    const menuKey = Object.keys(menuData).find((key) =>
-      pathRegexp.test(`${key}`)
-    );
+    const menuKey = Object.keys(menuData).find((key) => pathRegexp.test(`${key}`));
 
     let menuItem = {};
     if (menuKey) {
@@ -192,24 +186,25 @@ function saveTxBothFromAndTo(fromAccount, toAccount, actionType, txHash) {
 }
 
 function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj))
+  return JSON.parse(JSON.stringify(obj));
 }
 
-function checkPassword(password) {//必须为字母加数字且长度不小于8位
+function checkPassword(password) {
+  //必须为字母加数字且长度不小于8位
   var str = password;
-   if (str == null || str.length <8) {
-       return false;
-   }
-   var reg1 = new RegExp(/^[0-9A-Za-z]+$/);
-   if (!reg1.test(str)) {
-       return false;
-   }
-   var reg = new RegExp(/[A-Za-z].*[0-9]|[0-9].*[A-Za-z]/);
-   if (reg.test(str)) {
-       return true;
-   } else {
-       return false;
-   }
+  if (str == null || str.length < 8) {
+    return false;
+  }
+  var reg1 = new RegExp(/^[0-9A-Za-z]+$/);
+  if (!reg1.test(str)) {
+    return false;
+  }
+  var reg = new RegExp(/[A-Za-z].*[0-9]|[0-9].*[A-Za-z]/);
+  if (reg.test(str)) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 function parsePrivateKey(privateKey) {
@@ -222,7 +217,7 @@ function parsePrivateKey(privateKey) {
   console.log('公钥：' + publicKey);
   console.log('地址：' + EthCrypto.publicKey.toAddress(publicKey));
   //const bs58 = require('bs58');
-  //console.log(bs58.decode('EeGCnq9vgtb8qQ1XzLxF7g3w7XxrwrDUTz').toString('hex')); 
+  //console.log(bs58.decode('EeGCnq9vgtb8qQ1XzLxF7g3w7XxrwrDUTz').toString('hex'));
 }
 
 function getPublicKeyWithPrefix(publicKey) {
@@ -247,64 +242,59 @@ function isEmptyObj(obj) {
  * @param utf8Bytes
  * @returns {string}
  */
-function utf8ByteToUnicodeStr(utf8Bytes){
-  var unicodeStr ="";
-  for (var pos = 0; pos < utf8Bytes.length;){
-      var flag= utf8Bytes[pos];
-      var unicode = 0 ;
-      if ((flag >>>7) === 0 ) {
-          unicodeStr+= String.fromCharCode(utf8Bytes[pos]);
-          pos += 1;
-
-      } else if ((flag &0xFC) === 0xFC ){
-          unicode = (utf8Bytes[pos] & 0x3) << 30;
-          unicode |= (utf8Bytes[pos+1] & 0x3F) << 24;
-          unicode |= (utf8Bytes[pos+2] & 0x3F) << 18;
-          unicode |= (utf8Bytes[pos+3] & 0x3F) << 12;
-          unicode |= (utf8Bytes[pos+4] & 0x3F) << 6;
-          unicode |= (utf8Bytes[pos+5] & 0x3F);
-          unicodeStr+= String.fromCharCode(unicode) ;
-          pos += 6;
-
-      }else if ((flag &0xF8) === 0xF8 ){
-          unicode = (utf8Bytes[pos] & 0x7) << 24;
-          unicode |= (utf8Bytes[pos+1] & 0x3F) << 18;
-          unicode |= (utf8Bytes[pos+2] & 0x3F) << 12;
-          unicode |= (utf8Bytes[pos+3] & 0x3F) << 6;
-          unicode |= (utf8Bytes[pos+4] & 0x3F);
-          unicodeStr+= String.fromCharCode(unicode) ;
-          pos += 5;
-
-      } else if ((flag &0xF0) === 0xF0 ){
-          unicode = (utf8Bytes[pos] & 0xF) << 18;
-          unicode |= (utf8Bytes[pos+1] & 0x3F) << 12;
-          unicode |= (utf8Bytes[pos+2] & 0x3F) << 6;
-          unicode |= (utf8Bytes[pos+3] & 0x3F);
-          unicodeStr+= String.fromCharCode(unicode) ;
-          pos += 4;
-
-      } else if ((flag &0xE0) === 0xE0 ){
-          unicode = (utf8Bytes[pos] & 0x1F) << 12;;
-          unicode |= (utf8Bytes[pos+1] & 0x3F) << 6;
-          unicode |= (utf8Bytes[pos+2] & 0x3F);
-          unicodeStr+= String.fromCharCode(unicode) ;
-          pos += 3;
-
-      } else if ((flag &0xC0) === 0xC0 ){ //110
-          unicode = (utf8Bytes[pos] & 0x3F) << 6;
-          unicode |= (utf8Bytes[pos+1] & 0x3F);
-          unicodeStr+= String.fromCharCode(unicode) ;
-          pos += 2;
-
-      } else{
-          unicodeStr+= String.fromCharCode(utf8Bytes[pos]);
-          pos += 1;
-      }
+function utf8ByteToUnicodeStr(utf8Bytes) {
+  var unicodeStr = '';
+  for (var pos = 0; pos < utf8Bytes.length; ) {
+    var flag = utf8Bytes[pos];
+    var unicode = 0;
+    if (flag >>> 7 === 0) {
+      unicodeStr += String.fromCharCode(utf8Bytes[pos]);
+      pos += 1;
+    } else if ((flag & 0xfc) === 0xfc) {
+      unicode = (utf8Bytes[pos] & 0x3) << 30;
+      unicode |= (utf8Bytes[pos + 1] & 0x3f) << 24;
+      unicode |= (utf8Bytes[pos + 2] & 0x3f) << 18;
+      unicode |= (utf8Bytes[pos + 3] & 0x3f) << 12;
+      unicode |= (utf8Bytes[pos + 4] & 0x3f) << 6;
+      unicode |= utf8Bytes[pos + 5] & 0x3f;
+      unicodeStr += String.fromCharCode(unicode);
+      pos += 6;
+    } else if ((flag & 0xf8) === 0xf8) {
+      unicode = (utf8Bytes[pos] & 0x7) << 24;
+      unicode |= (utf8Bytes[pos + 1] & 0x3f) << 18;
+      unicode |= (utf8Bytes[pos + 2] & 0x3f) << 12;
+      unicode |= (utf8Bytes[pos + 3] & 0x3f) << 6;
+      unicode |= utf8Bytes[pos + 4] & 0x3f;
+      unicodeStr += String.fromCharCode(unicode);
+      pos += 5;
+    } else if ((flag & 0xf0) === 0xf0) {
+      unicode = (utf8Bytes[pos] & 0xf) << 18;
+      unicode |= (utf8Bytes[pos + 1] & 0x3f) << 12;
+      unicode |= (utf8Bytes[pos + 2] & 0x3f) << 6;
+      unicode |= utf8Bytes[pos + 3] & 0x3f;
+      unicodeStr += String.fromCharCode(unicode);
+      pos += 4;
+    } else if ((flag & 0xe0) === 0xe0) {
+      unicode = (utf8Bytes[pos] & 0x1f) << 12;
+      unicode |= (utf8Bytes[pos + 1] & 0x3f) << 6;
+      unicode |= utf8Bytes[pos + 2] & 0x3f;
+      unicodeStr += String.fromCharCode(unicode);
+      pos += 3;
+    } else if ((flag & 0xc0) === 0xc0) {
+      //110
+      unicode = (utf8Bytes[pos] & 0x3f) << 6;
+      unicode |= utf8Bytes[pos + 1] & 0x3f;
+      unicodeStr += String.fromCharCode(unicode);
+      pos += 2;
+    } else {
+      unicodeStr += String.fromCharCode(utf8Bytes[pos]);
+      pos += 1;
+    }
   }
   return unicodeStr;
 }
 
-// 
+//
 function getDataFromFile(fileName, chainId) {
   if (chainId == null) {
     chainId = oexchain.oex.getChainId();
@@ -376,7 +366,7 @@ async function loadAccountsFromLS() {
       const accountObj = await oexchain.account.getAccountByName(account);
       if (accountObj != null) {
         accountInfos.push(accountObj);
-      } 
+      }
     }
   }
   return accountInfos;
@@ -396,7 +386,6 @@ function getReadableNumber(value, assetDecimal, displayDecimal) {
   return renderValue;
 }
 
-
 function confuseInfo(originalInfo) {
   originalInfo = originalInfo.replace(/a-z0-9A-Z/g, '*');
 }
@@ -409,7 +398,7 @@ function getGasEarned(gasPrice, gasUsed, assetInfo) {
 
   var renderValue = new BigNumber(gasPrice).multipliedBy(new BigNumber(gasUsed));
   renderValue = renderValue.shiftedBy(decimals * -1);
-  
+
   BigNumber.config({ DECIMAL_PLACES: 6 });
   renderValue = renderValue.toString(10);
   return renderValue;
@@ -419,7 +408,7 @@ function getValidTime(timestamp) {
   var renderTime = new BigNumber(timestamp);
   renderTime = renderTime.shiftedBy(6 * -1);
   var date = new Date(renderTime.toNumber());
-  return date.toLocaleString();// +  '.' + (date.getMilliseconds() + 1000 + '').substr(1);
+  return date.toLocaleString(); // +  '.' + (date.getMilliseconds() + 1000 + '').substr(1);
 }
 
 function getSpanTime(timestamp) {
@@ -427,21 +416,20 @@ function getSpanTime(timestamp) {
 }
 // ^(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|[1-9])\.(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.(1\\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)$
 function checkIpVaild(ip) {
-  const ipReg = new RegExp("^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
-                          + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-                          + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-                          + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$");
+  const ipReg = new RegExp(
+    '^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\.' + '(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\.' + '(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\.' + '(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$'
+  );
   return ipReg.test(ip);
 }
 
-function getDuration(my_time) {  
-  var days    = my_time / 1000 / 60 / 60 / 24;
+function getDuration(my_time) {
+  var days = my_time / 1000 / 60 / 60 / 24;
   var daysRound = Math.floor(days);
-  var hours = my_time / 1000 / 60 / 60 - (24 * daysRound);
+  var hours = my_time / 1000 / 60 / 60 - 24 * daysRound;
   var hoursRound = Math.floor(hours);
-  var minutes = my_time / 1000 / 60 - (24 * 60 * daysRound) - (60 * hoursRound);
+  var minutes = my_time / 1000 / 60 - 24 * 60 * daysRound - 60 * hoursRound;
   var minutesRound = Math.floor(minutes);
-  var seconds = my_time / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
+  var seconds = my_time / 1000 - 24 * 60 * 60 * daysRound - 60 * 60 * hoursRound - 60 * minutesRound;
   console.log('转换时间:', daysRound + '天', hoursRound + '小时', minutesRound + '分', seconds + '秒');
   var time = '';
   if (daysRound > 0) {
@@ -460,9 +448,10 @@ function getDuration(my_time) {  
 }
 
 function guid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
   });
 }
 
@@ -470,7 +459,7 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-function getValidKeystores (authors, threshold) {
+function getValidKeystores(authors, threshold) {
   const keystoreList = loadKeystoreFromLS();
   let keystoreInfo = {};
   for (const keystore of keystoreList) {
@@ -508,10 +497,10 @@ function parseResult(outputs, bytes) {
   }
 
   if (!bytes || bytes === '0x' || bytes === '0X') {
-      throw new Error(`Invalid bytes string given: ${bytes}`);
+    throw new Error(`Invalid bytes string given: ${bytes}`);
   }
 
-  const ethersAbiCoder = new EthersAbiCoder()
+  const ethersAbiCoder = new EthersAbiCoder();
   const result = ethersAbiCoder.decode(outputs, bytes);
   let returnValues = [];
   let decodedValue;
@@ -527,7 +516,7 @@ function parseResult(outputs, bytes) {
 
         if (output.indexOf('int') > -1) {
           if (Array.isArray(decodedValue)) {
-            const values = decodedValue.map(value =>new BigNumber(value).toNumber());
+            const values = decodedValue.map((value) => new BigNumber(value).toNumber());
             decodedValue = values;
           } else {
             decodedValue = new BigNumber(decodedValue).toNumber();
@@ -571,7 +560,7 @@ function isEqualAddress(addressOne, addressTwo) {
 
 function callContractFunc(contractAccountName, funcName, paraTypes, paraValues) {
   const payload = '0x' + oexchain.utils.getContractPayload(funcName, paraTypes, paraValues);
-  const callInfo = {actionType:0, from: 'oexchain.founder', to: contractAccountName, assetId:0, gas:200000000, gasPrice:10000000000, value:0, data:payload, remark:''};
+  const callInfo = { actionType: 0, from: 'oexchain.founder', to: contractAccountName, assetId: 0, gas: 200000000, gasPrice: 10000000000, value: 0, data: payload, remark: '' };
   return oexchain.oex.call(callInfo, 'latest');
 }
 
@@ -592,30 +581,30 @@ async function checkURC20(contractAccountName) {
 }
 function doSave(value, type, name) {
   var blob;
-  if (typeof window.Blob == "function") {
-      blob = new Blob([value], {type: type});
+  if (typeof window.Blob == 'function') {
+    blob = new Blob([value], { type: type });
   } else {
-      var BlobBuilder = window.BlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder;
-      var bb = new BlobBuilder();
-      bb.append(value);
-      blob = bb.getBlob(type);
+    var BlobBuilder = window.BlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder;
+    var bb = new BlobBuilder();
+    bb.append(value);
+    blob = bb.getBlob(type);
   }
   var URL = window.URL || window.webkitURL;
   var bloburl = URL.createObjectURL(blob);
-  var anchor = document.createElement("a");
+  var anchor = document.createElement('a');
   if ('download' in anchor) {
-      anchor.style.visibility = "hidden";
-      anchor.href = bloburl;
-      anchor.download = name;
-      document.body.appendChild(anchor);
-      var evt = document.createEvent("MouseEvents");
-      evt.initEvent("click", true, true);
-      anchor.dispatchEvent(evt);
-      document.body.removeChild(anchor);
+    anchor.style.visibility = 'hidden';
+    anchor.href = bloburl;
+    anchor.download = name;
+    document.body.appendChild(anchor);
+    var evt = document.createEvent('MouseEvents');
+    evt.initEvent('click', true, true);
+    anchor.dispatchEvent(evt);
+    document.body.removeChild(anchor);
   } else if (navigator.msSaveBlob) {
-      navigator.msSaveBlob(blob, name);
+    navigator.msSaveBlob(blob, name);
   } else {
-      location.href = bloburl;
+    location.href = bloburl;
   }
 }
 
@@ -626,15 +615,15 @@ function parseAddLiqPayloadInfo(payload) {
   const firstAssetNumber = new BigNumber(bufferToHex(decodedInfo[0][0][1]));
   const secondAssetId = new BigNumber(bufferToHex(decodedInfo[0][1][0]));
   const secondAssetNumber = new BigNumber(bufferToHex(decodedInfo[0][1][1]));
-  return {firstAssetId, firstAssetNumber, secondAssetId, secondAssetNumber};
+  return { firstAssetId, firstAssetNumber, secondAssetId, secondAssetNumber };
 }
 
 function bufferToHex(buffer) {
   if (buffer.length == 0) return '0x00';
-  return '0x' + [...buffer].map (b => b.toString (16).padStart (2, "0")).join ("");
+  return '0x' + [...buffer].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-function trace (count) {
+function trace(count) {
   // var caller = trace.caller;
   // var i = 0;
   // count = count || 10;
@@ -647,10 +636,47 @@ function trace (count) {
   // console.log(traceLog);
 }
 
-export { getFlatMenuData, getRouterData, formatterMenuData, hex2Bytes, bytes2Hex, str2Bytes, str2Hex,
-         saveTxHash, saveTxBothFromAndTo, bytes2Number, deepClone, parsePrivateKey, checkPassword, 
-         isEmptyObj, getPublicKeyWithPrefix, utf8ByteToUnicodeStr, getDataFromFile, storeDataToFile, 
-         removeDataFromFile, loadKeystoreFromLS, loadAccountsFromLS, getReadableNumber, confuseInfo, 
-         getGasEarned, getValidTime, checkIpVaild, getDuration, guid, getRandomInt, getSpanTime,
-         getValidKeystores, storeContractABI, getContractABI, parseResult, checkPrefix, isEqualAddress, checkURC20,
-         trace, doSave, parseAddLiqPayloadInfo };
+export const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
+export {
+  getFlatMenuData,
+  getRouterData,
+  formatterMenuData,
+  hex2Bytes,
+  bytes2Hex,
+  str2Bytes,
+  str2Hex,
+  saveTxHash,
+  saveTxBothFromAndTo,
+  bytes2Number,
+  deepClone,
+  parsePrivateKey,
+  checkPassword,
+  isEmptyObj,
+  getPublicKeyWithPrefix,
+  utf8ByteToUnicodeStr,
+  getDataFromFile,
+  storeDataToFile,
+  removeDataFromFile,
+  loadKeystoreFromLS,
+  loadAccountsFromLS,
+  getReadableNumber,
+  confuseInfo,
+  getGasEarned,
+  getValidTime,
+  checkIpVaild,
+  getDuration,
+  guid,
+  getRandomInt,
+  getSpanTime,
+  getValidKeystores,
+  storeContractABI,
+  getContractABI,
+  parseResult,
+  checkPrefix,
+  isEqualAddress,
+  checkURC20,
+  trace,
+  doSave,
+  parseAddLiqPayloadInfo,
+};

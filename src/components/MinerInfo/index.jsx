@@ -1,51 +1,49 @@
 import React, { PureComponent } from 'react';
 import { Link } from 'react-router-dom';
-import * as oexchain from 'oex-web3';
 import { T } from '../../utils/lang';
 import { Iconfont } from '../Ui/iconfont';
 import './index.scss';
 import cx from 'classnames';
+import eventProxy from '../../utils/eventProxy';
+import { AppData } from '../../data/app';
+import * as oexchain from 'oex-web3';
+import * as utils from '../../utils/utils';
+import BigNumber from 'bignumber.js';
+import * as Constant from '../../utils/constant';
+import copy from 'copy-to-clipboard';
+import { Icon, Select, Dialog, Feedback, Grid } from '@icedesign/base';
+import { sleep } from '../../utils/notification';
+import { getAccountInfoById } from '../../utils/oexSDK';
+
+const zero = new BigNumber(0);
+const otherTokenLogo = require('../../pages/OexSwap/images/default-logo.png');
+
+// upAccount2Accout2RewardMap
 
 export default class MinerInfo extends PureComponent {
   state = {
     desc: [
-      {
-        title: 'OEXSWAP 交易对创建规则',
-        content: () => (
-          <div className="ui-desc-ct">
-            Token的链上持有账户地址数≥100方可创建包含该token的交易对。
-            <br />
-            <span className="ui-primary">[这个合约限制不了，合约只能判断过来交易的地址数有多少，如果要限制，需要前端来限制，但懂的用户可以直接绕过前端，直接调用合约接口， 防不住]</span>
-            <br />
-            例如，持有AA token的链上账户有100个，则可成功创建AA/OEX交易对；持有BB token的链上账户只有99个，则无法创建BB/OEX交易对。
-          </div>
-        ),
-      },
+      { title: 'OEXSWAP 交易对创建规则', content: () => <div className="ui-desc-ct">{T('miningText1')}</div> },
       {
         title: 'OEXSWAP 交易挖矿产出计划',
         content: () => (
           <div className="ui-desc-ct">
-            基本上没问题，不过只能是有发生交易的区块才能给OEX，没有交易的话就给不出去了
-            <br />
-            OEXSWAP 交易挖矿每个区块初始产出10个OEX，每90天为一个减半周期，共减半三次，每个周期出2,592,000个块。
+            {T('miningTtile2')}
             <br />
             <br />
-            <div style={{ marginTop: '6px' }}>
-              周期1：从区块高度<span className="ui-primary">X</span>开始，每个区块产出<span className="ui-primary">10</span>个OEX，计划产出<span className="ui-primary">25,920,000</span>个OEX
-            </div>
-            <div style={{ marginTop: '6px' }}>
-              周期2：从区块高度<span className="ui-primary">X+2,592,000</span>开始，每个区块产出<span className="ui-primary">5</span>个OEX，计划产出<span className="ui-primary">12,960,000</span>
-              个OEX。
-            </div>
-            <div style={{ marginTop: '6px' }}>
-              周期3：从区块高度<span className="ui-primary">X+5,184,000</span>开始，每个区块产出<span className="ui-primary">2.5</span>个OEX，计划产出<span className="ui-primary">6,480,000</span>个OEX
-            </div>
-            <div style={{ marginTop: '6px' }}>
-              周期4：从区块高度<span className="ui-primary">X+7,776,000</span>开始，每个区块产出<span className="ui-primary">1.25</span>个OEX，计划产出<span className="ui-primary">3,240,000</span>
-              个OEX
-            </div>
+            {T('miningTtile3')}
             <br />
-            <div>交易挖矿持续时间360天，计划产出48,600,000个OEX。</div>
+            <br />
+            {T('miningTtile4')}
+            <br />
+            <br />
+            {T('miningTtile5')}
+            <br />
+            <br />
+            {T('miningTtile6')}
+            <br />
+            <br />
+            {T('miningTtile7')}
           </div>
         ),
       },
@@ -53,48 +51,213 @@ export default class MinerInfo extends PureComponent {
         title: 'OEXSWAP 交易挖矿参与细则',
         content: () => (
           <div className="ui-desc-ct">
-            1- 参与交易挖矿的交易对必须以OEX为锚。例如，AA token与OEX token组成的AA/OEX交易对可参与交易挖矿； 而AA token与BB token组成的AA/BB交易对无法参与交易挖矿。
+            {T('miningTtile8')}
             <br />
             <br />
-            2- 该交易对的交易账号数≥10方能启动交易挖矿。例如，有10个账户用OEX交易了AA，则AA/OEX交易对自动参与交易挖矿； 只有9个账户用OEX交易了BB，则BB/OEX交易对无法参与交易挖矿。
+            {T('miningTtile9')}
             <br />
             <br />
-            3- 每个账号按其交易量占比瓜分每个区块产出的OEX，交易量统计单位为OEX。例如，某区块产出的时间段内OEXSWAP总交易量为
+            {T('miningTtile10')}
             <br />
             <br />
-            10000个OEX，甲账户交易量为100个OEX，则甲可分得该区块产出的OEX的1%，即可分得0.1个OEX。
-            <br />
-            <br />
-            4- 交易挖矿奖金池总量最高为48,600,000个OEX，达到区块高度X+7,776,000时交易挖矿活动自动结束，所有OEX奖励从oexliquidity账户
-            <br />
-            <br />
-            （OEX流动性账户）支出，不额外增发OEX。
+            {T('miningTtile11')}
           </div>
         ),
       },
       {
-        title: 'OEXSWAP 邀请挖矿参与细则',
+        title: 'OEXSWAP 雇佣挖矿参与细则',
         content: () => (
           <div className="ui-desc-ct">
-            此外，在OEXSWAP基础上社区推出邀请挖矿，即通过邀请链接邀请他人注册可额外获得20%的OEX。设立总量最高为9,720,000个OEX的“邀
-            请挖矿奖金池”，所有OEX奖励同样从oexliquidity账户（OEX流动性账户）支出，不额外增发OEX。
+            {T('miningTtile12')}
+            {T('miningTtile13')}
             <br />
             <br />
-            例如，A邀请B参与交易挖矿，A账户除了可以获得自己交易挖矿应得的奖励，还可以额外获得B账户交易挖矿奖励的20%作为其邀请挖矿奖励，
-            且B账户所获交易挖矿奖励不变，A账户所获邀请挖矿奖励从“邀请挖矿奖金池”中支出。 如果B又邀请了C，则B账户可额外获得C账
+            {T('miningTtile14')}
+            {T('miningTtile15')}
           </div>
         ),
       },
     ],
     descShow: {},
     rightBig: false,
+    CurrentBlock: AppData.CurrentBlock,
+    NextValidCandidates: AppData.NextValidCandidates,
+    PerBlockReward: zero,
+    pendingSpreadReward: zero,
+    accountSpreadRewardMap: zero,
+    accountSecondSpreadRewardMap: zero,
+    accountAmountMap: zero,
+    getDownAccountsNumber: 0,
+    getDownAccountsNumber2: 0,
+    SpreaDetail: '',
+    SpreaDetailLast: 0,
+    SpreaDetailList: [],
   };
+  timer = null;
   constructor(props) {
     super(props);
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    this.state.account = account;
   }
-  componentDidMount = () => {
-    //
+  componentDidMount = async () => {
+    eventProxy.on('AppData:CurrentBlock', (CurrentBlock) => this.setState({ CurrentBlock }));
+    eventProxy.on('AppData:NextValidCandidates', (NextValidCandidates) => this.setState({ NextValidCandidates }));
+    this.getUserSpread();
+    this.timer = setInterval(() => {
+      this.getUserSpread();
+    }, 5000);
+    this.getSpreadNum();
+    await AppData.mounted;
+    this.getPerBlockReward();
   };
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    this.updateDetailStepGoIndex = 0;
+  }
+  // 获取当前区块奖励值
+  async getPerBlockReward() {
+    const payloadInfo = { funcName: 'getReward', types: ['uint256'], values: [this.state.CurrentBlock.number] };
+    const res = await oexchain.action.readContract(Constant.oexswapminer, Constant.oexswapminer, payloadInfo, 'latest');
+    const parse = utils.parseResult(['uint256'], res);
+    this.setState({ PerBlockReward: new BigNumber(parse[0]._hex).shiftedBy(-18) });
+  }
+  // 获取当前用户推广挖矿信息
+  async getUserSpread() {
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    this.state.account = account;
+    if (!this.state.account) return;
+    const name = this.state.account.accountName;
+    oexchain.action.readContract(name, Constant.oexswapminer, { funcName: 'pendingSpreadReward', types: [], values: [] }, 'latest').then((res) => {
+      const parse = utils.parseResult(['uint256'], res);
+      this.setState({ pendingSpreadReward: new BigNumber(parse[0]._hex).shiftedBy(-18) });
+    });
+    oexchain.action.readContract(name, Constant.oexswapminer, { funcName: 'accountSpreadRewardMap', types: ['address'], values: [account.accountID] }, 'latest').then((res) => {
+      const parse = utils.parseResult(['uint256'], res);
+      this.setState({ accountSpreadRewardMap: new BigNumber(parse[0]._hex).shiftedBy(-18) });
+    });
+    oexchain.action.readContract(name, Constant.oexswapminer, { funcName: 'accountSecondSpreadRewardMap', types: ['address'], values: [account.accountID] }, 'latest').then((res) => {
+      const parse = utils.parseResult(['uint256'], res);
+      this.setState({ accountSecondSpreadRewardMap: new BigNumber(parse[0]._hex).shiftedBy(-18) });
+    });
+    oexchain.action.readContract(name, Constant.oexswapminer, { funcName: 'accountAmountMap', types: ['address'], values: [account.accountID] }, 'latest').then((res) => {
+      const parse = utils.parseResult(['uint256'], res);
+      this.setState({ accountAmountMap: new BigNumber(parse[0]._hex).shiftedBy(-18) });
+    });
+  }
+  // 获取推广人数
+  async getSpreadNum() {
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    this.state.account = account;
+    if (!this.state.account) return;
+    const name = this.state.account.accountName;
+    oexchain.action.readContract(name, Constant.swapspread, { funcName: 'getDownAccountsNumber', types: ['address'], values: [account.accountID] }, 'latest').then((res) => {
+      const parse = utils.parseResult(['uint256'], res);
+      this.setState({ getDownAccountsNumber: new BigNumber(parse[0]._hex).toNumber() });
+    });
+    oexchain.action.readContract(name, Constant.swapspreadhp, { funcName: 'getDownAccountsNumber2', types: ['address'], values: [account.accountID] }, 'latest').then((res) => {
+      const parse = utils.parseResult(['uint256'], res);
+      this.setState({ getDownAccountsNumber2: new BigNumber(parse[0]._hex).toNumber() });
+    });
+  }
+  async ViewSpreadDetail() {
+    this.setState({ rightBig: !this.state.rightBig });
+    if (this.state.rightBig) {
+      this.setState({ SpreaDetail: '' });
+      return;
+    }
+    if (this.state.SpreaDetailList.length > 0) return this.renderDetail();
+    this.updateDetailStep(0, ++this.updateDetailStepGoIndex);
+  }
+
+  updateDetailStepGoIndex = 0;
+  async updateDetailStep(index, updateDetailStepGoIndex) {
+    if (index === 0) {
+      this.setState({ SpreaDetail: <div className="ui-detail-info"></div> });
+      this.state.SpreaDetailList = [];
+      this.state.SpreaDetailLast = 0;
+    }
+    if (updateDetailStepGoIndex !== this.updateDetailStepGoIndex) return; // 非生命周期内
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    if (!account) return;
+    oexchain.action
+      .readContract(Constant.oexswapminerhp, Constant.oexswapminerhp, { funcName: 'getSpreadInfoByIndex', types: ['address', 'uint256'], values: [account.accountID, index] }, 'latest')
+      .then((res) => {
+        if (!res || res === '0x' || res === '0X') {
+          this.state.SpreaDetailLast = this.state.SpreaDetailList.length;
+          return;
+        }
+        const parse = utils.parseResult(['address', 'uint256', 'uint256'], res);
+        let [id, reward, deep] = parse.map((item) => {
+          if (typeof item === 'number') return new BigNumber(item);
+          if (typeof item === 'string') return new BigNumber(item.toLocaleLowerCase());
+          if (item && item._hex) return new BigNumber(item._hex);
+          return new BigNumber(item);
+        });
+        id = id.toNumber();
+        reward = reward.shiftedBy(-18).toFixed(2);
+        deep = deep.toNumber();
+        if (id === 0) {
+          this.state.SpreaDetailLast = this.state.SpreaDetailList.length;
+          return;
+        }
+        const detail = { id, reward, deep, account: null };
+        this.state.SpreaDetailList.push(detail);
+        getAccountInfoById(id).then((res) => {
+          detail.account = res;
+          this.renderDetail();
+        });
+        this.renderDetail();
+        const next = index + 1;
+        if (next >= this.state.SpreaDetailLast + 10) return;
+        this.updateDetailStep(next, updateDetailStepGoIndex);
+      });
+  }
+  SpreaDetailMore() {
+    this.state.SpreaDetailLast = this.state.SpreaDetailLast + 10;
+    this.updateDetailStep(this.state.SpreaDetailList.length + 1, this.updateDetailStepGoIndex);
+  }
+  renderDetail() {
+    this.setState({
+      SpreaDetail: (
+        <div className="ui-detail-info">
+          {this.state.SpreaDetailList.map(({ id, reward, deep, account }) => {
+            return (
+              <div key={id}>
+                <img src={otherTokenLogo}></img>
+                <div className="ui-speard-detail-id">{account ? account.accountName : id}</div>
+                <div className="ui-speard-detail-reward">
+                  <span>+</span>
+                  {reward} <span>OEX</span>
+                </div>
+                <div className="ui-speard-detail-deep" deep={deep}>
+                  {deep === 1 ? '一级矿工' : '二级矿工'}
+                </div>
+              </div>
+            );
+          })}
+          {this.state.SpreaDetailList.length === this.state.SpreaDetailLast + 10 && (
+            <div onClick={() => this.SpreaDetailMore()} className="ui-load-more">
+              加载更多
+            </div>
+          )}
+        </div>
+      ),
+    });
+  }
+  copySpeard = () => {
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    if (!account) return;
+    copy('https://app.oexswap.com/index.html#/downapp?icode=' + account.accountID);
+    Feedback.toast.success(T('已复制到粘贴板'));
+  };
+
+  async invitationHarvest() {
+    eventProxy.trigger('MinerInfo:invitationHarvest');
+  }
+  async harvest() {
+    eventProxy.trigger('MinerInfo:harvest');
+  }
+
   toggleDesc(index) {
     const descShow = this.state.descShow;
     if (descShow[index]) {
@@ -110,45 +273,46 @@ export default class MinerInfo extends PureComponent {
         <div className="ui-miner-line-bottom ui-clearfix" style={{ paddingBottom: '16px', position: 'relative' }}>
           <div className="ui-miner-left ui-clearfix ui-fl">
             <div className="ui-miner-block ui-fl">
-              <h4>108</h4>
-              <p>当前周期</p>
-              <h4 style={{ marginTop: '20px' }}>563643</h4>
-              <p>当前区块高度</p>
-              <h4 style={{ marginTop: '20px' }}>100 OEX</h4>
-              <p>当前区块奖励</p>
+              <h4>{this.state.NextValidCandidates.preEpoch}</h4>
+              <p>{T('当前周期')}</p>
+              <h4 style={{ marginTop: '20px' }}>{this.state.CurrentBlock.number}</h4>
+              <p>{T('当前区块高度')}</p>
+              <h4 style={{ marginTop: '20px' }}>{this.state.PerBlockReward.toFixed(0)} OEX</h4>
+              <p>{T('当前区块奖励')}</p>
             </div>
             <div className="ui-miner-block ui-fr">
-              <h4 style={{ marginTop: '80px' }}>100 OEX</h4>
-              <p>我的挖矿奖励</p>
-              <div style={{ marginTop: '32px' }} className="ui-btn">
-                提取
+              <h4>{this.state.accountAmountMap.toFixed(2)} OEX</h4>
+              <p>{T('我的挖矿奖励')}</p>
+              <div style={{ marginTop: '32px' }} onClick={() => this.harvest()} className="ui-btn">
+                {T('提取')}
               </div>
             </div>
           </div>
           <div className="ui-miner-right ui-fr">
             <div className="ui-miner-block ui-fr ui-clearfix">
-              <Iconfont onClick={() => this.setState({ rightBig: !this.state.rightBig })} icon={this.state.rightBig ? 'full-exit' : 'full'}></Iconfont>
+              <Iconfont onClick={() => this.ViewSpreadDetail()} icon={this.state.rightBig ? 'full-exit' : 'full'}></Iconfont>
               <div className="ui-fl">
-                <h5>12 人</h5>
-                <p>一级邀请 ｜ 20% OEX</p>
-                <h5 style={{ marginTop: '20px' }}>360 人</h5>
-                <p>二级邀请 ｜ 10% OEX</p>
-                <div style={{ marginTop: '47px' }} className="ui-btn">
-                  复制邀请链接
+                <h5>{this.state.getDownAccountsNumber} 人</h5>
+                <p>{T('一级邀请')} ｜ 20% OEX</p>
+                <h5 style={{ marginTop: '20px' }}>{this.state.getDownAccountsNumber2} 人</h5>
+                <p>{T('二级邀请')} ｜ 10% OEX</p>
+                <div style={{ marginTop: '47px' }} onClick={() => this.copySpeard()} className="ui-btn">
+                  {T('复制邀请链接')}
                 </div>
               </div>
               <div className="ui-fr">
-                <h6>100 OEX</h6>
-                <p>一级矿池奖励</p>
-                <h6 style={{ marginTop: '12px' }}>2000 OEX</h6>
+                <h6 style={{ marginTop: '70px' }}>{this.state.pendingSpreadReward.toFixed(2)} OEX</h6>
+                <p style={{ marginBottom: '24px' }}>{T('一、二级雇佣奖励')}</p>
+                {/* <h6 style={{ marginTop: '12px' }}>{this.state.accountSecondSpreadRewardMap.toFixed(2)} OEX</h6>
                 <p>二级矿池奖励</p>
                 <div style={{ marginTop: '20px' }} className="ui-total">
-                  合计：2100 OEX
-                </div>
-                <div style={{ marginTop: '18px' }} className="ui-btn">
-                  提取奖励
+                  合计：{this.state.pendingSpreadReward.toFixed(2)} OEX
+                </div> */}
+                <div style={{ marginTop: '18px' }} onClick={() => this.invitationHarvest()} className="ui-btn">
+                  {T('提取奖励')}
                 </div>
               </div>
+              {this.state.SpreaDetail}
             </div>
           </div>
         </div>
@@ -156,7 +320,7 @@ export default class MinerInfo extends PureComponent {
           return (
             <div className={cx('ui-desc ui-miner-line-bottom', { 'ui-show': this.state.descShow[index] })} key={item.title}>
               <h3 onClick={this.toggleDesc.bind(this, index)}>
-                {item.title}
+                {T(item.title)}
                 <img src="/img/right.png" />
               </h3>
               {item.content()}

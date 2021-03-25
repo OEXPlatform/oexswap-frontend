@@ -110,9 +110,10 @@ export default class OexSwap extends Component {
   }
 
   componentDidMount = async () => {
-    eventProxy.on('showMiningInfo', () => {
-      this.showMiningInfo();
-    });
+    eventProxy.on('showMiningInfo', () => this.showMiningInfo());
+    eventProxy.on('MinerInfo:invitationHarvest', () => this.setState({ callbackFunc: this.invitationHarvest, txInfoVisible: true }));
+    eventProxy.on('MinerInfo:harvest', () => this.setState({ callbackFunc: this.harvest, txInfoVisible: true }));
+
     fetch('https://api.oexchain.com/api/rpc/gettokens?pageIndex=0&pageSize=20&stats=10')
       .then((response) => {
         return response.json();
@@ -365,22 +366,22 @@ export default class OexSwap extends Component {
     this.setState({ miningInfo: this.state.miningInfo });
   };
 
-  harvest = (gasInfo, privateKey) => {
-    const { accountName, minerContractName } = this.state;
-    let actionInfo = { accountName, toAccountName: minerContractName, assetId: 0, amount: new BigNumber(0), remark: '' };
-    let payloadInfo = { funcName: 'withdraw', types: [], values: [] };
+  // harvest = (gasInfo, privateKey) => {
+  //   const { accountName, minerContractName } = this.state;
+  //   let actionInfo = { accountName, toAccountName: minerContractName, assetId: 0, amount: new BigNumber(0), remark: '' };
+  //   let payloadInfo = { funcName: 'withdraw', types: [], values: [] };
 
-    oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then((txHash) => {
-      this.checkReceipt(txHash, {
-        txHash,
-        actionInfo: {
-          typeId: 3,
-          typeName: '提取挖矿奖励',
-          accountName,
-        },
-      });
-    });
-  };
+  //   oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey).then((txHash) => {
+  //     this.checkReceipt(txHash, {
+  //       txHash,
+  //       actionInfo: {
+  //         typeId: 3,
+  //         typeName: '提取挖矿奖励',
+  //         accountName,
+  //       },
+  //     });
+  //   });
+  // };
 
   checkReceipt = (txHash, txDetailInfo) => {
     let count = 0;
@@ -1040,6 +1041,26 @@ export default class OexSwap extends Component {
         actionInfo: { typeId: 1, typeName: '移除流动性', accountName, inAssetInfo: { assetInfo: firstAsset, amount: outPoolAmount }, outAssetInfo: { assetInfo: secondAsset, amount: outPoolAmount } },
       });
     });
+  };
+
+  invitationHarvest = async (gasInfo, privateKey) => {
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    if (!account) return;
+    const actionInfo = { accountName: account.accountName, toAccountName: Constant.oexswapminer, assetId: 0, amount: new BigNumber(0), remark: '' };
+    const payloadInfo = { funcName: 'withdrawSpreadReward', types: [], values: [] };
+    const txHash = await oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey);
+    this.checkReceipt(txHash, {
+      txHash,
+      actionInfo: { typeId: 4, typeName: '提取雇佣奖励', accountName: account.accountName },
+    });
+  };
+  harvest = async (gasInfo, privateKey) => {
+    const account = utils.getDataFromFile(Constant.AccountObj);
+    if (!account) return;
+    const actionInfo = { accountName: account.accountName, toAccountName: Constant.oexswapminer, assetId: 0, amount: new BigNumber(0), remark: '' };
+    const payloadInfo = { funcName: 'withdraw', types: [], values: [] };
+    const txHash = await oexchain.action.executeContract(actionInfo, gasInfo, payloadInfo, privateKey);
+    this.checkReceipt(txHash, { txHash, actionInfo: { typeId: 3, typeName: '提取挖矿奖励', accountName: account.accountName } });
   };
 
   render() {

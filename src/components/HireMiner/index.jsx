@@ -5,16 +5,21 @@ import { T } from '../../utils/lang';
 import { Iconfont } from '../Ui/iconfont';
 import './index.scss';
 import cx from 'classnames';
+import eventProxy from '../../utils/eventProxy';
+import { AppData } from '../../data/app';
 
 export default class MinerInfo extends PureComponent {
   state = {
     rightBig: false,
+    CurrentBlock: AppData.CurrentBlock,
   };
   constructor(props) {
     super(props);
   }
   componentDidMount = () => {
-    //
+    eventProxy.on('AppData:CurrentBlock', (CurrentBlock) => {
+      this.setState({ CurrentBlock });
+    });
   };
   toggleDesc(index) {
     const descShow = this.state.descShow;
@@ -33,7 +38,7 @@ export default class MinerInfo extends PureComponent {
             <div className="ui-miner-block ui-fl">
               <h4>108</h4>
               <p>当前周期</p>
-              <h4 style={{ marginTop: '20px' }}>563643</h4>
+              <h4 style={{ marginTop: '20px' }}>{CurrentBlock}</h4>
               <p>当前区块高度</p>
               <h4 style={{ marginTop: '20px' }}>100 OEX</h4>
               <p>当前区块奖励</p>

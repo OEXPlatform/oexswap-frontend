@@ -348,24 +348,24 @@ export default class Header extends PureComponent {
         <div className="ui-layout-header-menu">
           <div className="ui-header-btn" style={{ marginRight: '30px' }} onClick={() => this.showMiningInfo()}>
             <Iconfont icon="wa"></Iconfont>
-            <span>交易挖矿</span>
+            <span>{T('挖矿信息')}</span>
             <Iconfont icon="hot"></Iconfont>
           </div>
-          <div className="ui-header-btn" style={{ marginRight: '114px' }} onClick={() => this.showMiningInfo()}>
+          {/* <div className="ui-header-btn" style={{ marginRight: '114px' }} onClick={() => this.showMiningInfo()}>
             <Iconfont icon="wa"></Iconfont>
             <span>雇佣挖矿</span>
             <Iconfont icon="hot"></Iconfont>
-          </div>
+          </div> */}
           <Balloon trigger={defaultTrigger} closable={false} style={{ color: '#5e768b' }}>
             {T('当前连接的节点')}:{this.state.nodeInfo}, ChainId:{this.state.chainId}
           </Balloon>
           <Balloon trigger={accountBtnTrigger} closable={false} style={{ color: '#5e768b' }}>
             {T('当前账号')}:{this.state.accountName == '' ? '尚未导入' : this.state.accountName}
           </Balloon>
-          <Button text type="normal" style={{ color: '#00C9A7', marginRight: '50px' }} onClick={() => this.setState({ spreadInfoDialogVisible: true })}>
+          {/* <Button text type="normal" style={{ color: '#00C9A7', marginRight: '50px' }} onClick={() => this.setState({ spreadInfoDialogVisible: true })}>
             <Iconfont icon="gift" style={{ marginRight: '8px', fontSize: '16px' }} primary></Iconfont>
             {T('邀请奖励')}
-          </Button>
+          </Button> */}
           {/* <Button text type="normal" style={{ color: '#808080', marginLeft: '30px' }} onClick={this.onChangeLanguage.bind(this)}>
             {this.state.curLang}
           </Button> */}
@@ -475,16 +475,16 @@ export default class Header extends PureComponent {
           <Dialog
             style={{ width: '600px', padding: 0, color: 'white' }}
             visible={this.state.spreadInfoDialogVisible}
-            title="推广信息"
+            title={T('推广信息')}
             footerAlign="center"
             closeable="esc,mask,close"
             onOk={() => this.setState({ spreadInfoDialogVisible: false })}
             onCancel={() => this.setState({ spreadInfoDialogVisible: false })}
             onClose={() => this.setState({ spreadInfoDialogVisible: false })}>
-            <Row style={{ color: 'white', marginLeft: '10px', marginTop: '10px', alignItems: 'center' }}>
-              您的推广链接: {this.state.spreadInfo.yourUrl}
+            <Row style={{ color: '#999', marginLeft: '10px', marginTop: '10px', alignItems: 'center' }}>
+              {T('您的推广链接')}: {this.state.spreadInfo.yourUrl}
               <Button type="primary" style={{ marginLeft: '10px', borderRadius: '10px' }} onClick={() => this.copyValue(this.state.spreadInfo.yourUrl)}>
-                复制
+                {T('复制')}
               </Button>
             </Row>
             <Row style={{ color: 'white', margin: '20px 0 0 10px', alignItems: 'center' }}>总推广用户数: {this.state.spreadInfo.downAccountNum}</Row>
