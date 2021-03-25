@@ -155,52 +155,43 @@ export default class OexSwap extends Component {
     this.updateToValue();
   }
 
-  getAllPair = () => {
+  getAllPair = async () => {
     const _this = this;
     let payloadInfo = { funcName: 'getPairNumber', types: [], values: [] }; // types和values即合约方法的参数类型和值
-    oexchain.action
-      .readContract(this.state.accountName, this.state.contractName, payloadInfo, 'latest')
-      .then((pairNumber) => {
-        pairNumber = parseInt(pairNumber);
-        console.log(pairNumber);
-        _this.state.pairList = [];
-        _this.state.pairMap = {};
-        for (let i = 0; i < pairNumber; i++) {
-          _this.getPairByIndex(i).then((pairInfo) => {
-            pairInfo.index = i;
-            _this.state.pairList.push(pairInfo);
-            _this.state.pairMap[pairInfo.firstAssetId + '-' + pairInfo.secondAssetId] = pairInfo;
-            const awaitList = [];
-            if (this.state.assetInfoMap[pairInfo.firstAssetId] == null) {
-              awaitList.push(
-                getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
-                  if (i === 0) console.log(pairInfo, assetInfo);
-                  if (!assetInfo) return;
-                  this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
-                })
-              );
-            }
-            if (this.state.assetInfoMap[pairInfo.secondAssetId] == null) {
-              awaitList.push(
-                getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
-                  if (i === 0) console.log(pairInfo, assetInfo);
-                  if (!assetInfo) return;
-                  this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
-                })
-              );
-            }
-            // 默认选一个
-            if (i === 0 && !this.state.fromInfo.selectAssetInfo && !this.state.toInfo.selectAssetInfo) {
-              Promise.all(awaitList).then(() => {
-                if (!this.state.assetInfoMap[pairInfo.firstAssetId]) return;
-                if (!this.state.assetInfoMap[pairInfo.secondAssetId]) return;
-                this.startExchange(pairInfo);
-              });
-            }
+    let pairNumber = await oexchain.action.readContract(this.state.accountName, this.state.contractName, payloadInfo, 'latest');
+    pairNumber = parseInt(pairNumber);
+    console.log(pairNumber);
+    _this.state.pairList = [];
+    _this.state.pairMap = {};
+    for (let i = 0; i < pairNumber; i++) {
+      _this.getPairByIndex(i, true).then((pairInfo) => {
+        pairInfo.index = i;
+        _this.state.pairList.push(pairInfo);
+        _this.state.pairMap[pairInfo.firstAssetId + '-' + pairInfo.secondAssetId] = pairInfo;
+        if (this.state.assetInfoMap[pairInfo.firstAssetId] == null) {
+          getAssetInfoById(pairInfo.firstAssetId).then((assetInfo) => {
+            if (i === 0) console.log(pairInfo, assetInfo);
+            if (!assetInfo) return;
+            this.state.assetInfoMap[pairInfo.firstAssetId] = assetInfo;
           });
         }
-      })
-      .catch((err) => console.log(err));
+        if (this.state.assetInfoMap[pairInfo.secondAssetId] == null) {
+          getAssetInfoById(pairInfo.secondAssetId).then((assetInfo) => {
+            if (i === 0) console.log(pairInfo, assetInfo);
+            if (!assetInfo) return;
+            this.state.assetInfoMap[pairInfo.secondAssetId] = assetInfo;
+          });
+        }
+        // 默认选一个
+        // if (i === 0 && !this.state.fromInfo.selectAssetInfo && !this.state.toInfo.selectAssetInfo) {
+        //   Promise.all(awaitList).then(() => {
+        //     if (!this.state.assetInfoMap[pairInfo.firstAssetId]) return;
+        //     if (!this.state.assetInfoMap[pairInfo.secondAssetId]) return;
+        //     this.startExchange(pairInfo);
+        //   });
+        // }
+      });
+    }
   };
 
   getFeeRate = () => {
@@ -212,20 +203,28 @@ export default class OexSwap extends Component {
       })
       .catch((err) => console.log(err));
   };
-
-  getPairByIndex = async (pairIndex) => {
+  getPairByIndexCache = JSON.parse(localStorage.getItem('getPairByIndex') || '{}');
+  getPairByIndex = async (pairIndex, cacheAble = false) => {
+    const key = this.state.contractName + ':' + pairIndex;
+    if (cacheAble && this.getPairByIndexCache[key]) {
+      const res = utils.clone(this.getPairByIndexCache[key]);
+      res.firstAssetNumber = new BigNumber(res.firstAssetNumber);
+      res.secondAssetNumber = new BigNumber(res.secondAssetNumber);
+      res.totalLiquidOfFirstAsset = new BigNumber(res.totalLiquidOfFirstAsset);
+      res.totalLiquidOfSecondAsset = new BigNumber(res.totalLiquidOfSecondAsset);
+      return res;
+    }
     const payloadInfo = { funcName: 'pairList', types: ['uint256'], values: [pairIndex] };
     const pairInfo = await oexchain.action.readContract(this.state.accountName, this.state.contractName, payloadInfo, 'latest');
-    const pairInfoElements = utils.parseResult(['uint', 'uint', 'uint', 'uint', 'uint', 'uint'], pairInfo);
-    //console.log(pairInfoElements)
-    return {
-      firstAssetId: pairInfoElements[0],
-      secondAssetId: pairInfoElements[1],
-      firstAssetNumber: new BigNumber(pairInfoElements[2]),
-      secondAssetNumber: new BigNumber(pairInfoElements[3]),
-      totalLiquidOfFirstAsset: new BigNumber(pairInfoElements[4]),
-      totalLiquidOfSecondAsset: new BigNumber(pairInfoElements[5]),
-    };
+    const pi = utils.parseResult(['uint', 'uint', 'uint', 'uint', 'uint', 'uint'], pairInfo);
+    const res = { firstAssetId: pi[0], secondAssetId: pi[1], firstAssetNumber: pi[2], secondAssetNumber: pi[3], totalLiquidOfFirstAsset: pi[4], totalLiquidOfSecondAsset: pi[5] };
+    this.getPairByIndexCache[key] = utils.clone(res);
+    localStorage.setItem('getPairByIndex', JSON.stringify(this.getPairByIndexCache));
+    res.firstAssetNumber = new BigNumber(res.firstAssetNumber);
+    res.secondAssetNumber = new BigNumber(res.secondAssetNumber);
+    res.totalLiquidOfFirstAsset = new BigNumber(res.totalLiquidOfFirstAsset);
+    res.totalLiquidOfSecondAsset = new BigNumber(res.totalLiquidOfSecondAsset);
+    return res;
   };
 
   getPairByAssetId = async (firstAssetId, secondAssetId) => {

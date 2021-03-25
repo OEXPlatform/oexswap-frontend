@@ -455,6 +455,10 @@ function guid() {
   });
 }
 
+export function clone(data) {
+  return JSON.parse(JSON.stringify(data));
+}
+
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
